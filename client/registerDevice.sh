@@ -23,7 +23,7 @@ fi
 responseFile=$(mktemp)
 
 # register device
-http_code=$(curl -w '%{http_code}' -s -d "token=$registerToken&deviceName=$deviceName" "$serverUrl"/registerDevice -o "$responseFile")
+http_code=$(curl -w '%{http_code}' -s -d "registerToken=$registerToken&deviceName=$deviceName" "$serverUrl"/registerDevice -o "$responseFile")
 
 content=$(cat "$responseFile")
 rm "$responseFile"
