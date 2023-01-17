@@ -35,7 +35,7 @@ updateCount=$(echo "$updateCounts" | paste -s -d+ - | bc)
 echo "Found $updateCount updates"
 
 # send update count and list of updates to server
-http_code=$(curl -w '%{http_code}' -s -d "deviceToken=$deviceToken&updateCount=$updateCount&updateList=$outdatedBrewPackages" "$serverUrl"/pushSystemUpdates -o "$responseFile")
+http_code=$(curl -w '%{http_code}' -s -d "deviceToken=$deviceToken&updateCount=$updateCount&updateList=$outdatedBrewPackages" "$serverUrl"/device/pushSystemUpdates -o "$responseFile")
 
 content=$(cat "$responseFile")
 rm "$responseFile"

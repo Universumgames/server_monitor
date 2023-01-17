@@ -23,7 +23,7 @@ fi
 responseFile=$(mktemp)
 
 # register device
-http_code=$(curl -w '%{http_code}' -s -d "registerToken=$registerToken&deviceName=$deviceName" "$serverUrl"/registerDevice -o "$responseFile")
+http_code=$(curl -w '%{http_code}' -s -d "registerToken=$registerToken&deviceName=$deviceName" "$serverUrl"/device/registerDevice -o "$responseFile")
 
 content=$(cat "$responseFile")
 rm "$responseFile"
@@ -34,6 +34,6 @@ if [ "$http_code" != "200" ]; then
 fi
 
 # save device token to file
-echo $(echo $content | jq -r '.message') > ./deviceToken
+echo $(echo $content | jq -r '.token') > ./deviceToken
 
-echo "Successfully registered this device as $deviceName"
+echo "Successfully registered this device as $deviceName with token $(cat ./deviceToken)"

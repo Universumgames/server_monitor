@@ -1,9 +1,10 @@
 import { config } from "../monitor_config"
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
 import express, { NextFunction, Request, Response } from "express"
-import { Device } from "../entities/Device"
+import { Device, DeviceSoftware } from "../entities/entities"
 import deviceRoutes from "./deviceRoutes"
 import { getDataFromAny } from "../helper"
+import Database from "../database"
 
 // eslint-disable-next-line new-cap
 const apiRoutes = express.Router()
@@ -49,10 +50,33 @@ export const serverInfo = async (req: Request, res: Response, next: NextFunction
     return res.status(ReturnCode.OK).json(returnData)
 }
 
+const testGetAllDevices = async (req: Request, res: Response, next: NextFunction) => {
+    const devices = await Device.find({ relations: ["software"] })
+    return res.status(200).json(devices)
+}
+
+const testGetAllSoftware = async (req: Request, res: Response, next: NextFunction) => {
+    const software = await DeviceSoftware.find()
+    return res.status(200).json(software)
+}
+
+const testClearAllDevices = async (req: Request, res: Response, next: NextFunction) => {
+    await Device.clear()
+    return res.status(200).end()
+}
+
+const testClearAllSoftware = async (req: Request, res: Response, next: NextFunction) => {
+    await DeviceSoftware.clear()
+    return res.status(200).end()
+}
+
 apiRoutes.all("/serverInfo", serverInfo)
 apiRoutes.use("/device", deviceRoutes)
 apiRoutes.post("/registerDevice", testRegisterDevice)
 apiRoutes.post("/registerSoftware", testRegisterSoftware)
 apiRoutes.post("/pushSystemUpdates", testPushSystemUpdates)
-
+apiRoutes.get("/getAllDevices", testGetAllDevices)
+apiRoutes.get("/getAllSoftware", testGetAllSoftware)
+apiRoutes.get("/clearAllDevices", testClearAllDevices)
+apiRoutes.get("/clearAllSoftware", testClearAllSoftware)
 export default apiRoutes

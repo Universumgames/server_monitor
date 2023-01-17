@@ -9,7 +9,7 @@ import {
     JoinTable,
     UpdateDateColumn
 } from "typeorm"
-import { DeviceStatus, IDevice, IDeviceSoftware } from "server_mgt-lib/types"
+import { DeviceStatus, IDevice, IDeviceSoftware, ISystemUpdatePost } from "server_mgt-lib/types"
 import { DeviceSoftware } from "./DeviceSoftware"
 import { v4 as uuidv4 } from "uuid"
 
@@ -28,17 +28,17 @@ export class Device extends BaseEntity implements IDevice {
     auth_key: string
 
     @Column({ type: "timestamp without time zone" })
-    @UpdateDateColumn()
     lastSeen: Date
 
     @Column({ type: "enum", enum: DeviceStatus, default: DeviceStatus.UNKNOWN })
-    status: DeviceStatus
+    status: DeviceStatus = DeviceStatus.UNKNOWN
 
     @OneToMany((type) => DeviceSoftware, (software) => software.device)
-    software: IDeviceSoftware[]
+    @JoinTable()
+    software: DeviceSoftware[]
 
     @Column("simple-array")
-    ipAddresses: string[]
+    ipAddresses: string[] = []
 
     /**
      * generate a new deice token for the device
@@ -46,5 +46,12 @@ export class Device extends BaseEntity implements IDevice {
      */
     static generateDeviceToken(): string {
         return uuidv4()
+    }
+
+    /**
+     * update the last seen date of the device, not saved automatically
+     */
+    updateLastSeen(): void {
+        this.lastSeen = new Date()
     }
 }

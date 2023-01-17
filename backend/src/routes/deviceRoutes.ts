@@ -1,9 +1,10 @@
-import { config } from "../monitor_config"
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
-import { DeviceStatus } from "server_mgt-lib/types"
+import { DeviceStatus, ISystemUpdatePost } from "server_mgt-lib/types"
 import express, { NextFunction, Request, Response } from "express"
 import { Device } from "../entities/Device"
 import { getDataFromAny, registerTokenIsValid } from "../helper"
+import { DeviceSoftware } from "../entities/DeviceSoftware"
+import { checkDeviceToken } from "./routehelper"
 
 // eslint-disable-next-line new-cap
 const deviceRoutes = express.Router()
@@ -15,17 +16,67 @@ const deviceRoutes = express.Router()
 } */
 
 const registerDevice = async (req: Request, res: Response, next: NextFunction) => {
-    const registerToken = getDataFromAny(req, "registerToken")
-    const deviceName = getDataFromAny(req, "deviceName")
-    if (registerToken == undefined || deviceName == undefined)
-        return res.status(ReturnCode.MISSING_PARAMS).end()
-    // check register validity
-    if (!registerTokenIsValid(registerToken)) return res.status(200).end()
+    try {
+        const registerToken = getDataFromAny(req, "registerToken")
+        const deviceName = getDataFromAny(req, "deviceName")
+        if (registerToken == undefined || deviceName == undefined)
+            return res.status(ReturnCode.MISSING_PARAMS).end()
+        // check register validity
+        if (!registerTokenIsValid(registerToken)) return res.status(200).end()
 
-    const device = new Device()
-    device.name = deviceName
-    device.status = DeviceStatus.RUNNING
-    device.auth_key = Device.generateDeviceToken()
+        const device = new Device()
+        device.name = deviceName
+        device.status = DeviceStatus.RUNNING
+        device.auth_key = Device.generateDeviceToken()
+        await device.save()
+
+        console.log(device)
+
+        return res.status(ReturnCode.OK).json({ token: device.auth_key })
+    } catch (e) {
+        console.error(e)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
 }
+
+const pushSystemUpdates = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const updateList = getDataFromAny(req, "updateList")
+        // const updateCount = getDataFromAny(req, "updateCount")
+        if (updateList == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
+
+        // @ts-ignore
+        const device = req.device
+        const updateListParsed = JSON.parse(updateList) as ISystemUpdatePost
+        const updateObjs: DeviceSoftware[] = []
+        if (device.software == undefined) device.software = []
+        // clear old system updates
+        device.software = device.software.filter(
+            (software: DeviceSoftware) => !software.isSystemUpdate
+        )
+        // add new system updates
+        for (const update of updateListParsed.updates) {
+            const updateObj = new DeviceSoftware()
+            updateObj.name = update.name
+            updateObj.currentVersion = update.currentVersion
+            updateObj.newVersion = update.newVersion
+            updateObj.device = device
+            updateObj.isSystemUpdate = true
+            updateObjs.push(updateObj)
+        }
+        await DeviceSoftware.save(updateObjs)
+        device.software.push(...updateObjs)
+        device.updateLastSeen()
+        await device.save()
+
+        return res.status(ReturnCode.OK).end()
+    } catch (e) {
+        console.error(e)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
+}
+
+deviceRoutes.post("/registerDevice", registerDevice)
+deviceRoutes.post("/pushSystemUpdates", checkDeviceToken, pushSystemUpdates)
 
 export default deviceRoutes

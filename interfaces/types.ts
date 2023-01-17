@@ -19,6 +19,7 @@ export interface IDeviceSoftware {
     name: string
     currentVersion: string
     newVersion: string
+    isSystemUpdate: boolean
 }
 
 export interface ISystemUpdatePost {

@@ -6,10 +6,14 @@ import { config } from "./monitor_config"
  */
 export default class Database {
     private dbConnection: Connection
+
+    private static instance: Database
     /**
      * Create basic database object
      */
-    constructor() {}
+    constructor() {
+        Database.instance = this
+    }
 
     /**
      * Initialise databse
@@ -47,5 +51,13 @@ export default class Database {
      */
     get connection(): Connection {
         return this.dbConnection
+    }
+
+    /**
+     * get singleton instance of Database
+     * @return {Database} singleton instance of Database
+     */
+    static getInstance(): Database {
+        return this.instance
     }
 }

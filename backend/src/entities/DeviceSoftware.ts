@@ -1,5 +1,14 @@
 /* eslint-disable new-cap */
-import { Entity, Column, PrimaryGeneratedColumn, BaseEntity, ManyToMany, OneToMany, JoinTable } from "typeorm"
+import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    BaseEntity,
+    ManyToMany,
+    OneToMany,
+    JoinTable,
+    ManyToOne
+} from "typeorm"
 import { DeviceStatus, IDevice, IDeviceSoftware } from "server_mgt-lib/types"
 import { Device } from "./Device"
 
@@ -20,6 +29,9 @@ export class DeviceSoftware extends BaseEntity implements IDeviceSoftware {
     @Column()
     newVersion: string
 
-    @ManyToMany((type) => Device, (device) => device.software)
+    @ManyToOne((type) => Device, (device) => device.software)
     device: Device
+
+    @Column()
+    isSystemUpdate: boolean = false
 }
