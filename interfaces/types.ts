@@ -2,6 +2,7 @@ export interface IDevice {
     id: number
     name: string
     auth_key: string
+    lastSeen: Date
     status: DeviceStatus
     software: IDeviceSoftware[]
     ipAddresses: string[]

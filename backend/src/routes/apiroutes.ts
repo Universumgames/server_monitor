@@ -1,8 +1,9 @@
 import { config } from "../monitor_config"
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
-
 import express, { NextFunction, Request, Response } from "express"
 import { Device } from "../entities/Device"
+import deviceRoutes from "./deviceRoutes"
+import { getDataFromAny } from "../helper"
 
 // eslint-disable-next-line new-cap
 const apiRoutes = express.Router()
@@ -30,10 +31,11 @@ const testRegisterSoftware = async (req: Request, res: Response, next: NextFunct
 
 export const testPushSystemUpdates = async (req: Request, res: Response, next: NextFunction) => {
     const returnData = {
-        token: req.body.deviceToken,
+        token: getDataFromAny(req, "deviceToken"),
         count: req.body.updateCount,
         updates: req.body.updateList
     }
+    console.log("Received update request from " + returnData.token)
     return res.status(ReturnCode.OK).json(returnData)
 }
 
@@ -48,6 +50,7 @@ export const serverInfo = async (req: Request, res: Response, next: NextFunction
 }
 
 apiRoutes.all("/serverInfo", serverInfo)
+apiRoutes.use("/device", deviceRoutes)
 apiRoutes.post("/registerDevice", testRegisterDevice)
 apiRoutes.post("/registerSoftware", testRegisterSoftware)
 apiRoutes.post("/pushSystemUpdates", testPushSystemUpdates)

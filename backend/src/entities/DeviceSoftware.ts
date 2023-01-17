@@ -15,10 +15,10 @@ export class DeviceSoftware extends BaseEntity implements IDeviceSoftware {
     name: string
 
     @Column()
-    installedVersion: string
+    currentVersion: string
 
     @Column()
-    newestVersion: string
+    newVersion: string
 
     @ManyToMany((type) => Device, (device) => device.software)
     device: Device

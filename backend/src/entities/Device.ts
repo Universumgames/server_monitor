@@ -1,7 +1,17 @@
 /* eslint-disable new-cap */
-import { Entity, Column, PrimaryGeneratedColumn, BaseEntity, ManyToMany, OneToMany, JoinTable } from "typeorm"
+import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    BaseEntity,
+    ManyToMany,
+    OneToMany,
+    JoinTable,
+    UpdateDateColumn
+} from "typeorm"
 import { DeviceStatus, IDevice, IDeviceSoftware } from "server_mgt-lib/types"
 import { DeviceSoftware } from "./DeviceSoftware"
+import { v4 as uuidv4 } from "uuid"
 
 @Entity()
 /**
@@ -17,6 +27,10 @@ export class Device extends BaseEntity implements IDevice {
     @Column({ unique: true })
     auth_key: string
 
+    @Column({ type: "timestamp without time zone" })
+    @UpdateDateColumn()
+    lastSeen: Date
+
     @Column({ type: "enum", enum: DeviceStatus, default: DeviceStatus.UNKNOWN })
     status: DeviceStatus
 
@@ -25,4 +39,12 @@ export class Device extends BaseEntity implements IDevice {
 
     @Column("simple-array")
     ipAddresses: string[]
+
+    /**
+     * generate a new deice token for the device
+     * @return {string} a random uuid
+     */
+    static generateDeviceToken(): string {
+        return uuidv4()
+    }
 }

@@ -58,5 +58,6 @@
         ],
         "operator-linebreak": ["off", "before", { "overrides": { "||": "after" } }],
         "quote-props": ["error", "as-needed"]
+        //"nonblock-statement-body-position": ["error", "below"]
     }
 }
