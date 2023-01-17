@@ -1,0 +1,55 @@
+version: "3.1"
+
+services:
+    db:
+        image: mariadb
+        command: --default-authentication-plugin=mysql_native_password
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: server_monitor
+        env_file:
+            - db.env
+        hostname: db
+        volumes:
+            - server_monitor_db:/var/lib/mysql
+        container_name: server_monitor_db
+        networks:
+            - server_monitor_net
+    api:
+        build:
+            context: ../../
+            dockerfile: ./server/dockerfile
+        restart: unless-stopped
+        volumes:
+            - ../config:/server_monitor/api_server/config
+        environment:
+            - NODE_ENV=production
+        container_name: server_monitor_apiServer
+        hostname: api
+        depends_on:
+            - "db"
+        links:
+            - "db"
+        networks:
+            - server_monitor_net
+    nginx:
+        build:
+            context: ../../
+            dockerfile: ./server/nginx/dockerfile
+        restart: unless-stopped
+        container_name: server_monitor_caddy
+        depends_on:
+            - "api"
+            - "db"
+        hostname: nginx
+        links:
+            - "api"
+        networks:
+            - server_monitor_net
+
+volumes:
+    server_monitor_db:
+networks:
+    server_monitor_net:
+        name: server_monitor_net
+        attachable: true

@@ -1,0 +1,12 @@
+{
+    "database": {
+        "host": "localhost",
+        "port": 3306,
+        "type": "mariadb",
+        "rootPW": "password",
+        "name": "server_monitor"
+    },
+    "serverPort": 6060,
+    "frontEndPort": 80,
+    "serverVersion": "0.1"
+}
