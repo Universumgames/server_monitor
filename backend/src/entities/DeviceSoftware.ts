@@ -1,15 +1,6 @@
 /* eslint-disable new-cap */
-import {
-    Entity,
-    Column,
-    PrimaryGeneratedColumn,
-    BaseEntity,
-    ManyToMany,
-    OneToMany,
-    JoinTable,
-    ManyToOne
-} from "typeorm"
-import { DeviceStatus, IDevice, IDeviceSoftware } from "server_mgt-lib/types"
+import { Entity, Column, PrimaryGeneratedColumn, BaseEntity, ManyToOne } from "typeorm"
+import { IDeviceSoftware } from "server_mgt-lib/types"
 import { Device } from "./Device"
 
 @Entity()

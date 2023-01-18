@@ -1,9 +1,8 @@
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
-import { DeviceStatus, ISystemUpdatePost } from "server_mgt-lib/types"
+import { DeviceState, ISystemStatus, ISystemUpdatePost } from "server_mgt-lib/types"
 import express, { NextFunction, Request, Response } from "express"
-import { Device } from "../entities/Device"
+import { Device, DeviceSoftware, SystemIP, SystemStatus } from "../entities/entities"
 import { getDataFromAny, registerTokenIsValid } from "../helper"
-import { DeviceSoftware } from "../entities/DeviceSoftware"
 import { checkDeviceToken } from "./routehelper"
 
 // eslint-disable-next-line new-cap
@@ -26,7 +25,7 @@ const registerDevice = async (req: Request, res: Response, next: NextFunction) =
 
         const device = new Device()
         device.name = deviceName
-        device.status = DeviceStatus.RUNNING
+        device.state = DeviceState.RUNNING
         device.auth_key = Device.generateDeviceToken()
         await device.save()
 
@@ -76,7 +75,35 @@ const pushSystemUpdates = async (req: Request, res: Response, next: NextFunction
     }
 }
 
+const pushSystemStatus = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const status = getDataFromAny(req, "status")
+        if (status == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
+
+        // @ts-ignore
+        const device = req.device
+
+        const statusParsed = JSON.parse(status) as ISystemStatus
+        if (device.status != undefined) device.status.delete()
+
+        console.log(statusParsed)
+
+        device.status = SystemStatus.copyFromJSON(statusParsed, device)
+
+        await device.status.save()
+
+        await SystemIP.save(device.status.ipAddresses)
+        await device.save()
+
+        return res.status(ReturnCode.OK).end()
+    } catch (e) {
+        console.error(e)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
+}
+
 deviceRoutes.post("/registerDevice", registerDevice)
 deviceRoutes.post("/pushSystemUpdates", checkDeviceToken, pushSystemUpdates)
+deviceRoutes.post("/pushSystemStatus", checkDeviceToken, pushSystemStatus)
 
 export default deviceRoutes

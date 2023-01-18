@@ -4,7 +4,6 @@ import express, { NextFunction, Request, Response } from "express"
 import { Device, DeviceSoftware } from "../entities/entities"
 import deviceRoutes from "./deviceRoutes"
 import { getDataFromAny } from "../helper"
-import Database from "../database"
 
 // eslint-disable-next-line new-cap
 const apiRoutes = express.Router()
@@ -51,7 +50,7 @@ export const serverInfo = async (req: Request, res: Response, next: NextFunction
 }
 
 const testGetAllDevices = async (req: Request, res: Response, next: NextFunction) => {
-    const devices = await Device.find({ relations: ["software"] })
+    const devices = await Device.find({ relations: ["software", "status", "status.ipAddresses"] })
     return res.status(200).json(devices)
 }
 

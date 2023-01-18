@@ -4,14 +4,14 @@ import {
     Column,
     PrimaryGeneratedColumn,
     BaseEntity,
-    ManyToMany,
     OneToMany,
-    JoinTable,
-    UpdateDateColumn
+    OneToOne,
+    JoinColumn
 } from "typeorm"
-import { DeviceStatus, IDevice, IDeviceSoftware, ISystemUpdatePost } from "server_mgt-lib/types"
+import { DeviceState, IDevice } from "server_mgt-lib/types"
 import { DeviceSoftware } from "./DeviceSoftware"
 import { v4 as uuidv4 } from "uuid"
+import { SystemStatus } from "./SystemStatus"
 
 @Entity()
 /**
@@ -27,18 +27,19 @@ export class Device extends BaseEntity implements IDevice {
     @Column({ unique: true })
     auth_key: string
 
-    @Column({ type: "timestamp without time zone" })
+    @Column({ type: "timestamp" })
     lastSeen: Date
 
-    @Column({ type: "enum", enum: DeviceStatus, default: DeviceStatus.UNKNOWN })
-    status: DeviceStatus = DeviceStatus.UNKNOWN
+    @Column({ type: "enum", enum: DeviceState, default: DeviceState.UNKNOWN })
+    state: DeviceState = DeviceState.UNKNOWN
+
+    @OneToOne((type) => SystemStatus, (status) => status.device, { cascade: true })
+    @JoinColumn()
+    status: SystemStatus
 
     @OneToMany((type) => DeviceSoftware, (software) => software.device)
-    @JoinTable()
+    @JoinColumn()
     software: DeviceSoftware[]
-
-    @Column("simple-array")
-    ipAddresses: string[] = []
 
     /**
      * generate a new deice token for the device

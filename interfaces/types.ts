@@ -3,12 +3,12 @@ export interface IDevice {
     name: string
     auth_key: string
     lastSeen: Date
-    status: DeviceStatus
+    state: DeviceState
+    status: ISystemStatus
     software: IDeviceSoftware[]
-    ipAddresses: string[]
 }
 
-export enum DeviceStatus {
+export enum DeviceState {
     RUNNING = "RUNNING",
     STOPPED = "STOPPED",
     UNKNOWN = "UNKNOWN"
@@ -24,4 +24,21 @@ export interface IDeviceSoftware {
 
 export interface ISystemUpdatePost {
     updates: IDeviceSoftware[]
+}
+
+export enum IPTypes {
+    IPV4 = "ipv4",
+    IPV6 = "ipv6"
+}
+
+export interface ISystemStatus {
+    uptimeSeconds: number
+    cpuUsage: { avg1m: number; avg5m: number; avg15m: number }
+    ipAddresses: ISystemIP[]
+}
+
+export interface ISystemIP {
+    ip: string
+    type?: IPTypes
+    interface?: string
 }

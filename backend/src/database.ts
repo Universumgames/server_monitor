@@ -29,7 +29,8 @@ export default class Database {
                 database: config.database.name,
                 // eslint-disable-next-line no-undef
                 entities: [__dirname + "/entities/entities.js"],
-                synchronize: true
+                synchronize: true,
+                logging: false
             })
             /* const repo = this.dbConnection.getRepository(User)
             const u = new User()

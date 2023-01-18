@@ -6,7 +6,10 @@ import { Device } from "../entities/Device"
 export const checkDeviceToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const deviceToken = getDeviceToken(req)
-        const device = await Device.findOne({ where: { auth_key: deviceToken } })
+        const device = await Device.findOne({
+            where: { auth_key: deviceToken },
+            relations: ["software", "status", "status.ipAddresses"]
+        })
         // @ts-ignore
         req.device = device
         if (device == undefined) {
