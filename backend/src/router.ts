@@ -2,6 +2,7 @@ import http from "http"
 import express, { Express } from "express"
 import cookieParser from "cookie-parser"
 import bodyParser from "body-parser"
+import helmet from "helmet"
 
 /**
  * Main class for managing http routes
@@ -33,6 +34,8 @@ export default class Router {
         this.router.use(bodyParser.urlencoded({ extended: true }))
         this.router.use(bodyParser.json())
         this.router.use(bodyParser.raw())
+        this.router.use(helmet())
+        this.router.disable("x-powered-by")
         this.router.use("/", this.routes)
         this.httpServer = http.createServer(this.router)
         this.isSetUp = true

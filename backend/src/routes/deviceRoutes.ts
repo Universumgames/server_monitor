@@ -102,8 +102,19 @@ const pushSystemStatus = async (req: Request, res: Response, next: NextFunction)
     }
 }
 
+const listDevices = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const devices = await Device.find()
+        return res.status(ReturnCode.OK).json(devices)
+    } catch (e) {
+        console.error(e)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
+}
+
 deviceRoutes.post("/registerDevice", registerDevice)
 deviceRoutes.post("/pushSystemUpdates", checkDeviceToken, pushSystemUpdates)
 deviceRoutes.post("/pushSystemStatus", checkDeviceToken, pushSystemStatus)
+deviceRoutes.get("/list", listDevices)
 
 export default deviceRoutes

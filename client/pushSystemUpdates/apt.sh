@@ -9,17 +9,17 @@ fi
 scriptDir=$(dirname "$0")
 
 serverUrl=$1
-deviceToken=${2:-$(cat $scriptDir/../deviceToken)}
+deviceToken=${2:-$(cat "$scriptDir"/../deviceToken)}
 
 # prompt user for variables if not provided
 if [ -z "$serverUrl" ]; then
   echo "Enter server url:"
-  read serverUrl
+  read -r serverUrl
 fi
 
 if [ -z "$deviceToken" ]; then
   echo "Enter device token:"
-  read deviceToken
+  read -r deviceToken
 fi
 
 responseFile=$(mktemp)
