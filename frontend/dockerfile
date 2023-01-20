@@ -1,0 +1,13 @@
+from node
+
+WORKDIR /server_monitor/frontend
+COPY ./frontend/ .
+COPY ./interfaces/ ../interfaces/
+RUN npm install --legacy-peer-deps
+RUN npm link ../interfaces
+RUN npm run build
+
+from caddy
+COPY --from=0 /server_monitor/frontend/dist /var/www
+COPY ./docker/Caddyfile /etc/caddy/Caddyfile
+EXPOSE 80

@@ -1,0 +1,12 @@
+stages:
+    - deploy
+
+deploy:
+    stage: deploy
+    image: docker:latest
+    tags:
+        - docker_local
+    script:
+        - ./docker/run-full.sh
+    only:
+        - master

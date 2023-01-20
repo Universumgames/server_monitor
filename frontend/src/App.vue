@@ -4,25 +4,56 @@
 
 <script lang="ts">
     import { Options, Vue } from "vue-class-component"
-    import { isDarkMode } from "./helper/helper"
+    import { isDarkMode, getQueryParam } from "./helper/helper"
 
     @Options({})
     export default class App extends Vue {
         isDark: boolean = false
 
-        created() {
+        mounted() {
             this.manageDarkMode()
         }
 
         manageDarkMode() {
+            if (this.styleOverwrites()) return
             this.isDark = isDarkMode()
             // watch for darkmode changes
             window.matchMedia("(prefers-color-scheme: dark)").addListener(() => {
+                if (this.styleOverwrites()) return
+
                 this.isDark = isDarkMode()
                 document.body.classList.remove(!this.isDark ? "darkVars" : "lightVars")
                 document.body.classList.add(this.isDark ? "darkVars" : "lightVars")
             })
             document.body.classList.add(this.isDark ? "darkVars" : "lightVars")
+        }
+
+        styleOverwrites(): boolean {
+            const darkMode = getQueryParam("darkmode")
+
+            if (darkMode != undefined) this.isDark = darkMode == "1" ? true : false
+            document.body.classList.remove(!this.isDark ? "darkVars" : "lightVars")
+            document.body.classList.add(this.isDark ? "darkVars" : "lightVars")
+
+            const bgColor = getQueryParam("bgColor")
+            if (bgColor != undefined) {
+                document.body.style.setProperty("--bg-color", bgColor)
+            }
+            const textColor = getQueryParam("textColor")
+            if (textColor != undefined) {
+                document.body.style.setProperty("--text-color", textColor)
+            }
+            const secondaryColor = getQueryParam("secondaryColor")
+            if (secondaryColor != undefined) {
+                document.body.style.setProperty("--secondary-color", secondaryColor)
+            }
+            const primaryColor = getQueryParam("primaryColor")
+            if (primaryColor != undefined) {
+                document.body.style.setProperty("--primary-color", primaryColor)
+            }
+
+            if (darkMode != undefined) return true
+            return false
         }
     }
 </script>
