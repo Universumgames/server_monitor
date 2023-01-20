@@ -8,6 +8,10 @@ deploy:
         - docker_local
     script:
         - apt-get update && apt-get install -y curl docker
+        # https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files
         - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash # Install the secure files tool
+        - ls .secure_files
+        - ls
+        - pwd
         - cp .secure_files/production.yml ./backend/config/
         - ./docker/run-full.sh
