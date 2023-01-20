@@ -3,10 +3,11 @@ stages:
 
 deploy:
     stage: deploy
-    image: docker:latest
+    image: ubuntu:latest
     tags:
         - docker_local
     script:
+        - apt-get update && apt-get install -y curl docker
         - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash # Install the secure files tool
         - cp .secure_files/production.yml ./backend/config/
         - ./docker/run-full.sh
