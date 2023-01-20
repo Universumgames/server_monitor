@@ -1,5 +1,5 @@
 export interface IDevice {
-    id: number
+    id: string
     name: string
     auth_key: string
     lastSeen: Date
@@ -15,7 +15,7 @@ export enum DeviceState {
 }
 
 export interface IDeviceSoftware {
-    id?: number
+    id?: string
     name: string
     currentVersion: string
     newVersion: string
@@ -32,6 +32,7 @@ export enum IPTypes {
 }
 
 export interface ISystemStatus {
+    id: string
     uptimeSeconds: number
     cpuUsage: { avg1m: number; avg5m: number; avg15m: number }
     ipAddresses: ISystemIP[]

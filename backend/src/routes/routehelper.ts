@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express"
-import { getDeviceToken } from "../helper"
+import { getDataFromAny, getDeviceToken, registerTokenIsValid } from "../helper"
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
 import { Device } from "../entities/Device"
 
@@ -18,6 +18,31 @@ export const checkDeviceToken = async (req: Request, res: Response, next: NextFu
             })
         }
         next()
+    } catch (e) {
+        console.error(e)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
+}
+
+export const checkLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        next()
+    } catch (e) {
+        console.error(e)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
+}
+
+export const checkRegistrationToken = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const registerToken = getDataFromAny(req, "registerToken")
+
+        if (registerToken == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
+
+        // @ts-ignore
+        req.registrationToken = registerToken
+        // check register validity
+        if (!registerTokenIsValid(registerToken)) next()
     } catch (e) {
         console.error(e)
         return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()

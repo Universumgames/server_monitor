@@ -9,7 +9,7 @@ import { Device } from "./Device"
  */
 export class DeviceSoftware extends BaseEntity implements IDeviceSoftware {
     @PrimaryGeneratedColumn("uuid")
-    id: number
+    id: string
 
     @Column()
     name: string

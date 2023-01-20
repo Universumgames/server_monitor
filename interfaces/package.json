@@ -10,6 +10,14 @@
     },
     "author": "universum",
     "license": "MIT",
+    "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^5.7.0",
+        "@typescript-eslint/parser": "^5.7.0",
+        "eslint": "^8.4.1",
+        "eslint-config-google": "^0.14.0",
+        "eslint-config-prettier": "^8.3.0",
+        "eslint-plugin-prettier": "^4.0.0"
+    },
     "dependencies": {
         "typescript": "^4.5.4"
     }

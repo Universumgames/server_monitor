@@ -25,10 +25,12 @@ export function getDataFromAny(req: Request, dataKey: string): string | undefine
             if (key != undefined) return key
         }
     }
-    if (req.body != undefined) {
-        if (req.body[dataKey] != undefined) return req.body[dataKey] as string
-    }
-    if (req.query != undefined) return req.query[dataKey] as string
+    if (req.body != undefined && req.body[dataKey] != undefined)
+        return req.body[dataKey] as string
+    if (req.query != undefined && req.query[dataKey] != undefined)
+        return req.query[dataKey] as string
+    if (req.params != undefined && req.params[dataKey] != undefined)
+        return req.params[dataKey] as string
     return undefined
 }
 

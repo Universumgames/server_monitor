@@ -19,7 +19,7 @@ import { SystemStatus } from "./SystemStatus"
  */
 export class Device extends BaseEntity implements IDevice {
     @PrimaryGeneratedColumn("uuid")
-    id: number
+    id: string
 
     @Column()
     name: string
@@ -33,7 +33,7 @@ export class Device extends BaseEntity implements IDevice {
     @Column({ type: "enum", enum: DeviceState, default: DeviceState.UNKNOWN })
     state: DeviceState = DeviceState.UNKNOWN
 
-    @OneToOne((type) => SystemStatus, (status) => status.device, { cascade: true })
+    @OneToOne((type) => SystemStatus, (status) => status.device)
     @JoinColumn()
     status: SystemStatus
 

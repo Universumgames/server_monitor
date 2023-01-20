@@ -43,7 +43,7 @@ json=$(jq -n \
   --arg cpuLoadAVG5m "$cpuLoadAVG5m" \
   --arg cpuLoadAVG15m "$cpuLoadAVG15m" \
   --argjson ipsJSON "$ipsJSON" \
-  '{uptimeSec: $uptimeSec, cpuUsage: { avg1m: $cpuLoadAVG1m, avg5m: $cpuLoadAVG5m, avg15m: $cpuLoadAVG15m }, ipAddresses: $ipsJSON}')
+  '{uptimeSeconds: $uptimeSec, cpuUsage: { avg1m: $cpuLoadAVG1m, avg5m: $cpuLoadAVG5m, avg15m: $cpuLoadAVG15m }, ipAddresses: $ipsJSON}')
 
 http_code=$(curl -w '%{http_code}' -s -d "deviceToken=$deviceToken&status=$json" "$serverUrl"/device/pushSystemStatus -o "$responseFile")
 

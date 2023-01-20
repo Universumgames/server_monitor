@@ -6,7 +6,7 @@ import {
     BaseEntity,
     OneToMany,
     OneToOne,
-    JoinColumn
+    JoinTable
 } from "typeorm"
 import { ISystemStatus } from "server_mgt-lib/types"
 import { Device } from "./Device"
@@ -18,7 +18,7 @@ import { SystemIP } from "./SystemIP"
  */
 export class SystemStatus extends BaseEntity implements ISystemStatus {
     @PrimaryGeneratedColumn("uuid")
-    id: number
+    id: string
 
     @OneToOne((type) => Device, (device) => device.status)
     device: Device
@@ -29,8 +29,8 @@ export class SystemStatus extends BaseEntity implements ISystemStatus {
     @Column({ type: "json" })
     cpuUsage: { avg1m: number; avg5m: number; avg15m: number }
 
-    @OneToMany((type) => SystemIP, (ip) => ip.status, { onDelete: "CASCADE", cascade: true })
-    @JoinColumn()
+    @OneToMany((type) => SystemIP, (ip) => ip.status, { cascade: true })
+    @JoinTable()
     ipAddresses: SystemIP[]
 
     /**
