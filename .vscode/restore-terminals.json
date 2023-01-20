@@ -1,0 +1,16 @@
+{
+    "restoreTerminals.terminals": [
+        {
+            "name": "Backend",
+            "commands": ["cd backend", "npm run dev"]
+        },
+        {
+            "name": "Frontend",
+            "commands": ["cd frontend", "npm run serve"]
+        },
+        {
+            "name": "Client",
+            "commands": ["cd client"]
+        }
+    ]
+}

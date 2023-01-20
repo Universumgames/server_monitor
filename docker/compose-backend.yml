@@ -7,7 +7,7 @@ services:
         restart: always
         environment:
             MYSQL_ROOT_PASSWORD: password
-            MYSQL_DATABASE: servermgt
+            MYSQL_DATABASE: server_monitor
         hostname: db
         volumes:
             - server_monitor_db:/var/lib/mysql
@@ -15,11 +15,11 @@ services:
     api:
         build:
             context: ../../
-            dockerfile: ./server/dockerfile
+            dockerfile: ./backend/dockerfile
         ports:
             - "6060:6060"
         volumes:
-            - ./config:/server_monitor/api_server/config
+            - ../backend/config:/server_monitor/api_server/config
         environment:
             - NODE_ENV=production
         container_name: apiServer

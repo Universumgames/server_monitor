@@ -1,0 +1,19 @@
+{
+  #TESTING
+  #local_certs
+  debug
+
+  #Production
+  http_port 80
+  #https_port 443
+  auto_https off
+}
+
+localhost:80 {
+  root * /var/www 
+  route /api/* {
+    uri strip_prefix /api
+    reverse_proxy api:6060
+  }
+  file_server
+}

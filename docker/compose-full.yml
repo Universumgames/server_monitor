@@ -17,11 +17,11 @@ services:
             - server_monitor_net
     api:
         build:
-            context: ../../
-            dockerfile: ./server/dockerfile
+            context: ../
+            dockerfile: ./backend/dockerfile
         restart: unless-stopped
         volumes:
-            - ../config:/server_monitor/api_server/config
+            - ../backend/config:/server_monitor/api_server/config
         environment:
             - NODE_ENV=production
         container_name: server_monitor_apiServer
@@ -32,20 +32,28 @@ services:
             - "db"
         networks:
             - server_monitor_net
-    nginx:
-        build:
-            context: ../../
-            dockerfile: ./server/nginx/dockerfile
+    caddy:
+        #image: caddy/caddy:2.6.2-alpine
+        image: arm64v8/caddy
         restart: unless-stopped
+        volumes:
+            - ./config:/config
+            - ./Caddyfile:/etc/caddy/Caddyfile
+            - ../frontend/dist:/var/www
         container_name: server_monitor_caddy
         depends_on:
             - "api"
             - "db"
-        hostname: nginx
+        hostname: caddy
         links:
             - "api"
         networks:
             - server_monitor_net
+            #- out
+        ports:
+            - "80:80"
+            - "2019:2019"
+            - "443:443"
 
 volumes:
     server_monitor_db:

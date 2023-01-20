@@ -32,7 +32,7 @@
         }
     })
     export default class DeviceOverview extends Vue {
-        deviceName!: string
+        deviceName?: string
         deviceId!: string
         basicDevice?: IDevice
         systemStatus?: ISystemStatus
