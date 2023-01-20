@@ -10,5 +10,3 @@ deploy:
         - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash # Install the secure files tool
         - cp .secure_files/production.yml ./backend/config/
         - ./docker/run-full.sh
-    only:
-        - master
