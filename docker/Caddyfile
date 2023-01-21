@@ -9,7 +9,7 @@
   auto_https off
 }
 
-localhost:80 {
+:80 {
   root * /var/www 
   route /api/* {
     uri strip_prefix /api
