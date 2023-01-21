@@ -7,7 +7,8 @@ deploy:
     tags:
         - docker_local
     script:
-        - apt-get update && apt-get install -y curl docker.io
+        - apt-get update && apt-get install -y curl
+        - curl -fsSL https://get.docker.com | sh # Install Docker
         # https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files
         - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash # Install the secure files tool
         - cp .secure_files/production.json ./backend/config/
