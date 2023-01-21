@@ -119,6 +119,19 @@ const listDevices = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const listDeviceIDs = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const devices = await Device.find()
+        const devicesSend = devices.map((device) => device.id)
+
+        return res.status(ReturnCode.OK).json(devicesSend)
+    } catch (e) {
+        console.error(e)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
+}
+
+
 const getDeviceStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // @ts-ignore
@@ -146,7 +159,7 @@ export const getBasicDevice = async (req: Request, res: Response, next: NextFunc
         if (device == undefined) return res.status(ReturnCode.BAD_REQUEST).end()
 
         const deviceSend: any = Object.assign({}, device)
-        if ((Date.now() - deviceSend.lastSeen.getTime()) / 1000 < 1000 && deviceSend.state == DeviceState.UNKNOWN)
+        if ((Date.now() - deviceSend.lastSeen.getTime()) / 1000 / 60 < 1000 && deviceSend.state == DeviceState.UNKNOWN)
             deviceSend.state = DeviceState.RUNNING
 
         deviceSend.auth_key = undefined
@@ -178,6 +191,7 @@ deviceRoutes.post("/registerDevice", checkRegistrationToken, registerDevice)
 deviceRoutes.post("/pushSystemUpdates", checkDeviceToken, pushSystemUpdates)
 deviceRoutes.post("/pushSystemStatus", checkDeviceToken, pushSystemStatus)
 deviceRoutes.get("/list", checkLoggedIn, listDevices)
+deviceRoutes.get("/listIDs", checkLoggedIn, listDeviceIDs)
 deviceRoutes.get("/:deviceID/state", checkLoggedIn, getDeviceStatus)
 deviceRoutes.get("/:deviceID/basic", checkLoggedIn, getBasicDevice)
 deviceRoutes.get("/:deviceID/software", checkLoggedIn, getSoftwareUpdates)

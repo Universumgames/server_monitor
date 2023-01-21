@@ -4,6 +4,7 @@ import express, { NextFunction, Request, Response } from "express"
 import { Device, DeviceSoftware } from "../entities/entities"
 import deviceRoutes from "./deviceRoutes"
 import { getDataFromAny } from "../helper"
+import userRoutes from "./userRouters"
 
 // eslint-disable-next-line new-cap
 const apiRoutes = express.Router()
@@ -71,6 +72,7 @@ const testClearAllSoftware = async (req: Request, res: Response, next: NextFunct
 
 apiRoutes.all("/serverInfo", serverInfo)
 apiRoutes.use("/device", deviceRoutes)
+apiRoutes.use("/user", userRoutes)
 apiRoutes.post("/registerDevice", testRegisterDevice)
 apiRoutes.post("/registerSoftware", testRegisterSoftware)
 apiRoutes.post("/pushSystemUpdates", testPushSystemUpdates)

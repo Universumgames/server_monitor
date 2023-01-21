@@ -1,17 +1,24 @@
 <template>
     <div class="deviceOverviewContainer">
-        <h3>
-            {{ basicDevice?.name ?? deviceName }}
-            <StatusIndicator :style="'background-color:' + statusColor" />
-        </h3>
-        <small>{{ basicDevice?.id ?? deviceId }}</small
-        ><br />
-        <small>Powerstate: {{ basicDevice?.state ?? "" }}</small
-        ><br />
-        <small>Last contact ~{{ lastSeenDiff }} ago</small><br />
-        <small>Uptime: ~{{ uptime }}</small
-        ><br />
-        <small>Software updates: {{ updateCount }}</small>
+        <div v-if="loading || error" class="emptyContainer">
+            <BlankDeviceOverview />
+        </div>
+        <div v-else>
+            <h3>
+                {{ basicDevice?.name ?? deviceName }}
+                <StatusIndicator
+                    :style="'background-color:' + statusColor"
+                    :tooltip="getStatusTooltip()" />
+            </h3>
+            <small>{{ basicDevice?.id ?? deviceId }}</small
+            ><br />
+            <small>Powerstate: {{ basicDevice?.state ?? "" }}</small
+            ><br />
+            <small>Last contact ~{{ lastSeenDiff }} ago</small><br />
+            <small>Uptime: ~{{ uptime }}</small
+            ><br />
+            <small>Software updates: {{ updateCount }}</small>
+        </div>
     </div>
 </template>
 
@@ -21,6 +28,7 @@
     import { getSystemStatus, getBasicDevice, getSoftware } from "@/helper/requests"
     import StatusIndicator from "@/components/StatusIndicator.vue"
     import { getStatusIndicatorColor } from "@/helper/statusIndicator"
+    import BlankDeviceOverview from "./Blanks/BlankDeviceOverview.vue"
 
     @Options({
         props: {
@@ -28,7 +36,8 @@
             deviceId: String
         },
         components: {
-            StatusIndicator
+            StatusIndicator,
+            BlankDeviceOverview
         }
     })
     export default class DeviceOverview extends Vue {
@@ -37,6 +46,9 @@
         basicDevice?: IDevice
         systemStatus?: ISystemStatus
         softwareUpdates?: IDeviceSoftware[]
+
+        loading: boolean = true
+        error: boolean = false
 
         uptime = ""
         lastSeenDiff = ""
@@ -53,6 +65,8 @@
                 this.$forceUpdate()
             }, 10000)
 
+            this.loading = false
+
             this.$forceUpdate()
         }
 
@@ -68,10 +82,18 @@
             this.softwareUpdates = await getSoftware(this.deviceId)
             this.uptime = this.getUptimeString()
             this.lastSeenDiff = this.getLastSeenDiff()
-            this.statusColor = getStatusIndicatorColor(this.basicDevice)
-            this.updateCount = this.softwareUpdates.filter(
-                (update) => update.currentVersion! + update.newVersion
-            ).length
+            this.statusColor =
+                this.basicDevice == undefined ? "gray" : getStatusIndicatorColor(this.basicDevice)
+            this.updateCount =
+                this.softwareUpdates == undefined
+                    ? 0
+                    : this.softwareUpdates.filter(
+                          (update) => update.currentVersion! + update.newVersion
+                      ).length
+
+            if (this.basicDevice == undefined) {
+                this.error = true
+            }
         }
 
         getLastSeenDiff() {
@@ -96,6 +118,17 @@
             if (uptimeHour < 48) return uptimeHour.toFixed(0) + " hours"
             const uptimeDay = uptimeHour / 24
             return uptimeDay.toFixed(0) + " days"
+        }
+
+        getStatusTooltip() {
+            return (
+                (this.basicDevice?.state ?? "Unknown state") +
+                " \n" +
+                this.uptime +
+                " up \n" +
+                this.updateCount +
+                " Updates available"
+            )
         }
     }
 </script>

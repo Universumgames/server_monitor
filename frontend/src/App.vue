@@ -12,6 +12,11 @@
 
         mounted() {
             this.manageDarkMode()
+            // @ts-ignore
+            this.$router.beforeEach(async (to) => {
+                document.title =
+                    to.meta.title != undefined ? (to.meta.title as string) : "404 Page not found"
+            })
         }
 
         manageDarkMode() {

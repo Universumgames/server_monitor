@@ -26,6 +26,9 @@ export const checkDeviceToken = async (req: Request, res: Response, next: NextFu
 
 export const checkLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        // TODO implement checking of user session token is valid
+        // @ts-ignore
+        req.user = "test"
         next()
     } catch (e) {
         console.error(e)

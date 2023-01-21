@@ -16,7 +16,7 @@
         devices: IDevice[] = []
 
         async created() {
-            this.devices = await getDevices()
+            this.devices = (await getDevices()) ?? []
         }
     }
 </script>

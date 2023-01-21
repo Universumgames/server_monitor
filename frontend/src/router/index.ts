@@ -22,18 +22,35 @@ const routes = [
             {
                 path: "/",
                 name: "Devices",
-                component: () => import(/* webpackChunkName: "devices" */ "../views/DeviceList.vue")
+                component: () => import(/* webpackChunkName: "devices" */ "../views/DeviceList.vue"),
+                meta: {
+                    title: "Devicelist"
+                }
             },
             {
                 path: "/devices/:id",
                 name: "Device",
-                component: () => import(/* webpackChunkName: "device" */ "../views/DeviceDetails.vue")
+                component: () => import(/* webpackChunkName: "device" */ "../views/DeviceDetails.vue"),
+                meta: {
+                    title: "Device Details"
+                }
+            },
+            {
+                path: "/login",
+                name: "Login",
+                component: () => import(/* webpackChunkName: "login" */ "../views/Login.vue"),
+                meta: {
+                    title: "Login"
+                }
             }
         ]
     },
     {
         path: "/overview/:id?",
-        component: () => import(/* webpackChunkName: "layout" */ "../views/DeviceOverviewStandalone.vue")
+        component: () => import(/* webpackChunkName: "layout" */ "../views/DeviceOverviewStandalone.vue"),
+        meta: {
+            title: "Device Overview"
+        }
     }
 
 ]
