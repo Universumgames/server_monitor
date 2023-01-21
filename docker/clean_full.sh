@@ -1,2 +1,3 @@
 #!/bin/bash
-docker compose -f ./compose-full.yml down
+scriptDir=$(dirname "$0")
+docker compose -f $scriptDir/compose-full.yml down
