@@ -9,7 +9,7 @@ services:
             MYSQL_DATABASE: server_monitor
         env_file:
             - db.env
-        hostname: db
+        hostname: server_monitor_db
         volumes:
             - server_monitor_db:/var/lib/mysql
         container_name: server_monitor_db
@@ -25,7 +25,7 @@ services:
         environment:
             - NODE_ENV=production
         container_name: server_monitor_apiServer
-        hostname: api
+        hostname: server_monitor_api
         depends_on:
             - "db"
         links:
@@ -43,7 +43,7 @@ services:
         depends_on:
             - "api"
             - "db"
-        hostname: caddy
+        hostname: server_monitor_caddy
         links:
             - "api"
         networks:
