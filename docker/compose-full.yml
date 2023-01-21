@@ -48,9 +48,9 @@ services:
             - "api"
         networks:
             - server_monitor_net
-            #- out
-        ports:
-            - "80:80"
+            - out
+        #ports:
+        #    - "80:80"
 
 volumes:
     server_monitor_db:
@@ -58,3 +58,5 @@ networks:
     server_monitor_net:
         name: server_monitor_net
         attachable: true
+    out:
+        external: true
