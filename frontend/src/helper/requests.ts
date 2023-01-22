@@ -1,5 +1,15 @@
 import * as types from "server_mgt-lib/types"
 
+export async function getServerInfo(): Promise<any> {
+    try {
+        const response = await fetch("/api/serverInfo")
+        return await response.json()
+    } catch (e) {
+        console.error(e)
+        return undefined
+    }
+}
+
 export async function getDevices(): Promise<types.IDevice[] | undefined> {
     try {
         const response = await fetch("/api/device/list")
@@ -18,7 +28,6 @@ export async function getDeviceIDs(): Promise<string[] | undefined> {
         console.error(e)
         return undefined
     }
-
 }
 
 export async function getBasicDevice(deviceId: string): Promise<types.IDevice | undefined> {
@@ -30,7 +39,6 @@ export async function getBasicDevice(deviceId: string): Promise<types.IDevice | 
         return undefined
     }
 }
-
 
 export async function getSystemStatus(deviceId: string): Promise<types.ISystemStatus | undefined> {
     try {
