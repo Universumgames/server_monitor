@@ -8,5 +8,6 @@
     },
     "serverPort": 6060,
     "frontEndPort": 80,
-    "serverVersion": "0.1"
+    "serverVersion": "0.1",
+    "superAdminMail": "programming@universegame.de"
 }

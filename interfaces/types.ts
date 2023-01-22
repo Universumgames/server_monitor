@@ -6,6 +6,7 @@ export interface IDevice {
     state: DeviceState
     status: ISystemStatus
     software: IDeviceSoftware[]
+    groups: IGroup[]
 }
 
 export enum DeviceState {
@@ -42,4 +43,18 @@ export interface ISystemIP {
     ip: string
     type?: IPTypes
     interface?: string
+}
+
+export interface IUser {
+    id: string
+    username: string
+    email: string
+    admin: boolean
+
+    groups: IGroup[]
+}
+
+export interface IGroup {
+    id: string
+    name: string
 }

@@ -6,12 +6,14 @@ import {
     BaseEntity,
     OneToMany,
     OneToOne,
-    JoinColumn
+    JoinColumn,
+    ManyToMany
 } from "typeorm"
 import { DeviceState, IDevice } from "server_mgt-lib/types"
 import { DeviceSoftware } from "./DeviceSoftware"
 import { v4 as uuidv4 } from "uuid"
 import { SystemStatus } from "./SystemStatus"
+import { Group } from "./Group"
 
 @Entity()
 /**
@@ -40,6 +42,10 @@ export class Device extends BaseEntity implements IDevice {
     @OneToMany((type) => DeviceSoftware, (software) => software.device)
     @JoinColumn()
     software: DeviceSoftware[]
+
+    @ManyToMany((type) => Group)
+    @JoinColumn()
+    groups: Group[]
 
     /**
      * generate a new deice token for the device

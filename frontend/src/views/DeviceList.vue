@@ -1,14 +1,20 @@
 <template>
     <div>
         <h1>Devices</h1>
-        <div>
-            <LoadingScreen v-show="loading" />
-            <div v-show="devices.length == 0 && !loading && !error">No devices found</div>
-            <h2 v-show="error">An error ocurred retrieving devices</h2>
-        </div>
+        <LoadingScreen v-show="loading" />
 
         <div id="deviceOverviewContainer">
-            <BlankDeviceOverview v-show="(loading && !error) || true" v-for="i in 10" :key="i" />
+            <div class="deviceListEmptyInfoContainer">
+                <div v-show="devices.length == 0 && !loading && !error" id="emptyDeviceList">
+                    No devices found
+                </div>
+                <h2 v-show="error">An error ocurred retrieving devices</h2>
+            </div>
+
+            <BlankDeviceOverview
+                v-show="(loading && !error) || devices.length == 0"
+                v-for="i in 10"
+                :key="i" />
             <DeviceOverview v-for="deviceID in devices" :key="deviceID" :deviceId="deviceID" />
         </div>
     </div>
@@ -59,6 +65,7 @@
 
 <style>
     #deviceOverviewContainer {
+        position: relative;
         display: flex;
         flex-wrap: wrap;
         flex-direction: row;
@@ -68,5 +75,15 @@
     #deviceOverviewContainer > * {
         flex: 1 1 26ch;
         width: fit-content;
+    }
+
+    .deviceListEmptyInfoContainer {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2em;
+        font-weight: bold;
+        z-index: 10;
     }
 </style>

@@ -127,6 +127,7 @@
         text-decoration: none;
         margin-left: 1ch;
         display: inline-block;
+        cursor: pointer;
     }
 
     a.router-link-exact-active {
