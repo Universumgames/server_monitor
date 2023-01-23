@@ -146,4 +146,15 @@ export default class GroupManagement {
         })
         return devices.some((d) => d.id == data.deviceId)
     }
+
+    /**
+     * get single user group from user id
+     * @param {{string}} data user data
+     * @return {Group} the main group the user is in
+     */
+    static async getUserGroup(data: { userId: string }): Promise<Group | undefined> {
+        const user = await UserManagement.getUser({ id: data.userId }, ["userGroup"])
+        if (user == undefined) return undefined
+        return user.userGroup
+    }
 }

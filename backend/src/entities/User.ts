@@ -1,5 +1,5 @@
 /* eslint-disable new-cap */
-import { IGroup, IUser } from "server_mgt-lib/types"
+import { IUser } from "server_mgt-lib/types"
 import {
     Entity,
     Column,

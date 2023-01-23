@@ -27,7 +27,7 @@ export default class UserManagement {
         }
         return await User.findOne({
             where: { id: userId, username: data.userame, email: data.mail },
-            relations: [...["groups"], ...additionalRelations]
+            relations: [...["groups", "userGroup"], ...additionalRelations]
         })
     }
 

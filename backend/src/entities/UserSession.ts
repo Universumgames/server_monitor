@@ -1,15 +1,5 @@
 /* eslint-disable new-cap */
-import {
-    Entity,
-    Column,
-    PrimaryGeneratedColumn,
-    BaseEntity,
-    OneToMany,
-    JoinColumn,
-    ManyToMany,
-    OneToOne,
-    ManyToOne
-} from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, BaseEntity, ManyToOne } from "typeorm"
 
 import { User } from "./User"
 

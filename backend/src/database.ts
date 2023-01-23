@@ -16,7 +16,7 @@ export default class Database {
     }
 
     /**
-     * Initialise databse
+     * Initialise database
      */
     async init() {
         try {

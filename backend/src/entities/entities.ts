@@ -9,11 +9,11 @@ import { UserSession } from "./UserSession"
 
 export {
     Device,
-    DeviceSoftware,
-    SystemStatus,
-    SystemIP,
-    User,
-    Group,
     DeviceRegistrationToken,
+    DeviceSoftware,
+    Group,
+    SystemIP,
+    SystemStatus,
+    User,
     UserSession
 }

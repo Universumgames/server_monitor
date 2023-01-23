@@ -7,7 +7,6 @@ import {
     OneToMany,
     OneToOne,
     JoinColumn,
-    ManyToMany,
     ManyToOne
 } from "typeorm"
 import { DeviceState, IDevice } from "server_mgt-lib/types"
