@@ -80,6 +80,9 @@ export default class UserManagement {
         const user = await UserManagement.getUser({ id: data.userId })
         if (user == undefined) return undefined
         session.user = user
+        // set expiration to 3 months
+        session.expires = new Date()
+        session.expires.setMonth(session.expires.getMonth() + 3)
         return await session.save()
     }
 
@@ -125,13 +128,6 @@ export default class UserManagement {
  * @return {string} the login url
  */
 function urlBuilder(req: Request, loginKey: string): string {
-    const port = req.app.settings.port || config.frontEndPort
-    return (
-        req.protocol +
-        "://" +
-        req.headers.host +
-        (port == 80 || port == 443 ? "" : ":" + port) +
-        "/api/user/login?token=" +
-        encodeURIComponent(loginKey)
-    )
+    // const port = req.app.settings.port || config.frontEndPort
+    return config.url + "/user/login?token=" + encodeURIComponent(loginKey)
 }

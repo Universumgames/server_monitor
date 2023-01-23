@@ -2,8 +2,8 @@ import { UserSession } from "../entities/UserSession"
 import express, { NextFunction, Request, Response } from "express"
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
 import UserManagement from "../UserManagement"
-import { addSessionCookie, getDataFromAny } from "../helper"
-import { checkLoggedIn } from "./routehelper"
+import { addSessionCookie, getDataFromAny, userIsAdmin } from "../helper"
+import { checkAdmin, checkLoggedIn } from "./routehelper"
 import { User } from "entities/User"
 
 // eslint-disable-next-line new-cap
@@ -61,9 +61,27 @@ const getBasicUserData = async (req: Request, res: Response, next: NextFunction)
             id: user.id,
             email: user.email,
             username: user.username,
-            admin: user.admin
+            admin: user.admin || userIsAdmin(user)
         }
         return res.status(ReturnCode.OK).json(responseUser)
+    } catch (error) {
+        console.error(error)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
+}
+
+const createUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const username = getDataFromAny(req, "username")
+        const email = getDataFromAny(req, "email")
+        if (username == undefined || email == undefined)
+            return res.status(ReturnCode.MISSING_PARAMS).end()
+
+        const user = await UserManagement.createUser({ username, email })
+        if (user == undefined) return res.status(ReturnCode.BAD_REQUEST).end()
+
+        await UserManagement.createAndSendLoginMail({ user, req })
+        return res.status(ReturnCode.OK).end()
     } catch (error) {
         console.error(error)
         return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
@@ -73,5 +91,6 @@ const getBasicUserData = async (req: Request, res: Response, next: NextFunction)
 userRoutes.all("/login", login)
 userRoutes.get("/isLoggedIn", checkLoggedIn, isLoggedIn)
 userRoutes.get("/basicUserData", checkLoggedIn, getBasicUserData)
+userRoutes.post("/createUser", checkLoggedIn, checkAdmin, createUser)
 
 export default userRoutes

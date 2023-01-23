@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express"
 import { getDataFromAny, getDeviceToken } from "../helper"
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
-import { Device, DeviceRegistrationToken } from "../entities/entities"
-import UserManagement from "UserManagement"
+import { Device, DeviceRegistrationToken, User, UserSession } from "../entities/entities"
+import UserManagement from "../UserManagement"
 
 export const checkDeviceToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -27,13 +27,37 @@ export const checkDeviceToken = async (req: Request, res: Response, next: NextFu
 
 export const checkLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const user = await UserManagement.getUser({ sessionToken: getDeviceToken(req) })
+        const sessionTokenString = getDeviceToken(req)
+        if (sessionTokenString == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
+        const user = await UserManagement.getUser({ sessionToken: sessionTokenString })
+
+        // check if session is valid
+        const session = await UserSession.findOne({ token: sessionTokenString })
+        if (session == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
+
+        if (session.expires > new Date()) {
+            await session.remove()
+            return res.status(ReturnCode.UNAUTHORIZED).end()
+        }
 
         // TODO unauthorized if user is not found
         // if (user == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
 
         // @ts-ignore
         req.user = user
+        next()
+    } catch (e) {
+        console.error(e)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
+}
+
+export const checkAdmin = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // @ts-ignore
+        const user = req.user as User
+        if (user == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
+        if (!user.admin) return res.status(ReturnCode.UNAUTHORIZED).end()
         next()
     } catch (e) {
         console.error(e)

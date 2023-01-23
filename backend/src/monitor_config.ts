@@ -10,6 +10,7 @@ export const config = {
     },
     serverPort: nodeconfig.get<number>("serverPort"),
     frontEndPort: nodeconfig.get<number>("frontEndPort"),
+    url: nodeconfig.get<string>("url"),
     serverVersion: nodeconfig.get<string>("serverVersion"),
     superAdmin: {
         mail: nodeconfig.get<string>("superAdmin.mail"),
