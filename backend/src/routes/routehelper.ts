@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express"
-import { getDataFromAny, getDeviceToken } from "../helper"
+import { cookieName, getDataFromAny, getDeviceToken, getSessionToken } from "../helper"
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
 import { Device, DeviceRegistrationToken, User, UserSession } from "../entities/entities"
 import UserManagement from "../UserManagement"
@@ -27,17 +27,18 @@ export const checkDeviceToken = async (req: Request, res: Response, next: NextFu
 
 export const checkLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const sessionTokenString = getDeviceToken(req)
-        if (sessionTokenString == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
+        const sessionTokenString = getSessionToken(req)
+        if (sessionTokenString == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
+
         const user = await UserManagement.getUser({ sessionToken: sessionTokenString })
 
         // check if session is valid
-        const session = await UserSession.findOne({ token: sessionTokenString })
+        const session = await UserSession.findOne({ where: { token: sessionTokenString } })
         if (session == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
 
-        if (session.expires > new Date()) {
+        if (session.expires < new Date()) {
             await session.remove()
-            return res.status(ReturnCode.UNAUTHORIZED).end()
+            return res.status(ReturnCode.UNAUTHORIZED).clearCookie(cookieName).end()
         }
 
         // TODO unauthorized if user is not found
