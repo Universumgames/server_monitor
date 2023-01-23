@@ -14,7 +14,7 @@ export default class UserManagement {
      * @return {User | undefined} the user or undefined
      */
     static async getUser(
-        data: { id?: string; userame?: string; mail?: string; sessionToken?: string },
+        data: { id?: string; username?: string; mail?: string; sessionToken?: string },
         additionalRelations: string[] = []
     ): Promise<User | undefined> {
         let userId = data.id
@@ -25,8 +25,18 @@ export default class UserManagement {
             })
             if (session != undefined) userId = session.user.id
         }
+
+        let whereClause: any = {}
+        if (userId != undefined) whereClause = { ...whereClause, id: userId }
+        if (data.username != undefined) whereClause = { ...whereClause, username: data.username }
+        if (data.mail != undefined) whereClause = { ...whereClause, email: data.mail }
+
+        Object.keys(whereClause).forEach((key) =>
+            whereClause[key] === undefined ? delete whereClause[key] : {}
+        )
+
         return await User.findOne({
-            where: { id: userId, username: data.userame, email: data.mail },
+            where: { ...whereClause },
             relations: [...["groups", "userGroup"], ...additionalRelations]
         })
     }
@@ -40,11 +50,13 @@ export default class UserManagement {
         const user = new User()
         user.username = data.username
         user.email = data.email
-        user.userGroup = new Group()
-        user.userGroup.name = data.username
-        user.userGroup.owner = user
-        await user.userGroup.save()
-        return await user.save()
+        const userGroup = new Group()
+        userGroup.name = data.username
+        userGroup.owner = user
+        await userGroup.save()
+        user.userGroup = userGroup
+        await user.save()
+        return user
     }
 
     /**
@@ -59,7 +71,7 @@ export default class UserManagement {
     }
 
     /**
-     * create new session
+     * Create new session
      * @param {{string}} data user data to find user
      * @return {UserSession} the created session
      */

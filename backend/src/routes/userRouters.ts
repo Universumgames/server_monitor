@@ -4,6 +4,7 @@ import { ReturnCode } from "server_mgt-lib/ReturnCode"
 import UserManagement from "../UserManagement"
 import { addSessionCookie, getDataFromAny } from "../helper"
 import { checkLoggedIn } from "./routehelper"
+import { User } from "entities/User"
 
 // eslint-disable-next-line new-cap
 const userRoutes = express.Router()
@@ -16,9 +17,10 @@ const userRoutes = express.Router()
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const mail = getDataFromAny(req.body, "mail")
-        const token = getDataFromAny(req.body, "token")
-        if (mail == undefined && token == undefined) return res.status(ReturnCode.BAD_REQUEST).end()
+        const mail = getDataFromAny(req, "mail")
+        const token = getDataFromAny(req, "token")
+        if (mail == undefined && token == undefined)
+            return res.status(ReturnCode.MISSING_PARAMS).end()
 
         if (token != undefined) {
             const user = await UserManagement.getUser({ sessionToken: token })
@@ -50,7 +52,26 @@ const isLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
-userRoutes.post("/login", login)
+const getBasicUserData = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // @ts-ignore
+        const user = req.user as User
+
+        const responseUser = {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            admin: user.admin
+        }
+        return res.status(ReturnCode.OK).json(responseUser)
+    } catch (error) {
+        console.error(error)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
+}
+
+userRoutes.all("/login", login)
 userRoutes.get("/isLoggedIn", checkLoggedIn, isLoggedIn)
+userRoutes.get("/basicUserData", checkLoggedIn, getBasicUserData)
 
 export default userRoutes

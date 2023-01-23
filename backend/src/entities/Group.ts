@@ -15,6 +15,5 @@ export class Group extends BaseEntity implements IGroup {
     name: string
 
     @ManyToMany((type) => User)
-    @JoinColumn()
     owner: User
 }

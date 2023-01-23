@@ -41,15 +41,12 @@ export class Device extends BaseEntity implements IDevice {
     status: SystemStatus
 
     @OneToMany((type) => DeviceSoftware, (software) => software.device)
-    @JoinColumn()
     software: DeviceSoftware[]
 
     @ManyToOne((type) => Group)
-    @JoinColumn()
     group: Group
 
     @ManyToOne((type) => User, (user) => user.owns)
-    @JoinColumn()
     owner: User
 
     /**

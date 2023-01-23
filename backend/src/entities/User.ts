@@ -8,7 +8,8 @@ import {
     OneToMany,
     JoinColumn,
     ManyToMany,
-    OneToOne
+    OneToOne,
+    JoinTable
 } from "typeorm"
 import { Device } from "./Device"
 import { Group } from "./Group"
@@ -22,28 +23,26 @@ export class User extends BaseEntity implements IUser {
     @PrimaryGeneratedColumn("uuid")
     id: string
 
-    @Column()
+    @Column({ unique: true })
     username: string
 
-    @Column()
+    @Column({ unique: true })
     email: string
 
     @ManyToMany((type) => Group)
-    @JoinColumn()
+    @JoinTable()
     groups: Group[]
 
-    @Column()
+    @Column({ default: false })
     admin: boolean
 
     @OneToMany((type) => Device, (device) => device.owner)
-    @JoinColumn()
     owns: Device[]
 
-    @OneToOne((type) => Device, (device) => device.owner, { cascade: true })
+    @OneToOne((type) => Device, (device) => device.owner)
     @JoinColumn()
     userGroup: Group
 
     @OneToMany((type) => UserSession, (session) => session.user)
-    @JoinColumn()
     sessions: UserSession[]
 }

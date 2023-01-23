@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express"
 import { getDataFromAny, getDeviceToken } from "../helper"
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
 import { Device, DeviceRegistrationToken } from "../entities/entities"
+import UserManagement from "UserManagement"
 
 export const checkDeviceToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -26,9 +27,13 @@ export const checkDeviceToken = async (req: Request, res: Response, next: NextFu
 
 export const checkLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // TODO implement checking of user session token is valid
+        const user = await UserManagement.getUser({ sessionToken: getDeviceToken(req) })
+
+        // TODO unauthorized if user is not found
+        // if (user == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
+
         // @ts-ignore
-        req.user = "test"
+        req.user = user
         next()
     } catch (e) {
         console.error(e)
