@@ -1,6 +1,6 @@
 import { config } from "./monitor_config"
 import { Device, Group, User, UserSession } from "./entities/entities"
-import getMailManager from "MailManager"
+import getMailManager from "./MailManager"
 import { Request } from "express"
 
 /**

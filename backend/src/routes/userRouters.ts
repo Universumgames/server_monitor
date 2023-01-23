@@ -1,4 +1,4 @@
-import { UserSession } from "entities/UserSession"
+import { UserSession } from "../entities/UserSession"
 import express, { NextFunction, Request, Response } from "express"
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
 import UserManagement from "../UserManagement"
