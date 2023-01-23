@@ -9,5 +9,15 @@
     "serverPort": 6060,
     "frontEndPort": 80,
     "serverVersion": "0.1",
-    "superAdminMail": "programming@universegame.de"
+    "superAdmin": {
+        "mail": "programming@universegame.de",
+        "username": "universum"
+    },
+    "mailServer": {
+        "host": "your mail host",
+        "port": 587,
+        "secure": false,
+        "user": "your mail user",
+        "password": "your mail password"
+    }
 }

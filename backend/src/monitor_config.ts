@@ -11,5 +11,15 @@ export const config = {
     serverPort: nodeconfig.get<number>("serverPort"),
     frontEndPort: nodeconfig.get<number>("frontEndPort"),
     serverVersion: nodeconfig.get<string>("serverVersion"),
-    superAdminMail: nodeconfig.get<string>("superAdminMail")
+    superAdmin: {
+        mail: nodeconfig.get<string>("superAdmin.mail"),
+        username: nodeconfig.get<string | undefined>("superAdmin.username")
+    },
+    mailServer: {
+        host: nodeconfig.get<string>("mailServer.host"),
+        port: nodeconfig.get<number>("mailServer.port"),
+        secure: nodeconfig.get<boolean>("mailServer.secure"),
+        user: nodeconfig.get<string>("mailServer.user"),
+        password: nodeconfig.get<string>("mailServer.password")
+    }
 }

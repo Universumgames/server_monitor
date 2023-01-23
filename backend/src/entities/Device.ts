@@ -7,13 +7,15 @@ import {
     OneToMany,
     OneToOne,
     JoinColumn,
-    ManyToMany
+    ManyToMany,
+    ManyToOne
 } from "typeorm"
 import { DeviceState, IDevice } from "server_mgt-lib/types"
 import { DeviceSoftware } from "./DeviceSoftware"
 import { v4 as uuidv4 } from "uuid"
 import { SystemStatus } from "./SystemStatus"
 import { Group } from "./Group"
+import { User } from "./User"
 
 @Entity()
 /**
@@ -43,9 +45,13 @@ export class Device extends BaseEntity implements IDevice {
     @JoinColumn()
     software: DeviceSoftware[]
 
-    @ManyToMany((type) => Group)
+    @ManyToOne((type) => Group)
     @JoinColumn()
-    groups: Group[]
+    group: Group
+
+    @ManyToOne((type) => User, (user) => user.owns)
+    @JoinColumn()
+    owner: User
 
     /**
      * generate a new deice token for the device

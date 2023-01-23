@@ -1,9 +1,10 @@
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
 import { DeviceState, ISystemStatus, ISystemUpdatePost } from "server_mgt-lib/types"
 import express, { NextFunction, Request, Response } from "express"
-import { Device, DeviceSoftware, SystemIP, SystemStatus } from "../entities/entities"
+import { Device, DeviceSoftware, SystemIP, SystemStatus, User } from "../entities/entities"
 import { getDataFromAny } from "../helper"
 import { checkDeviceToken, checkLoggedIn, checkRegistrationToken } from "./routehelper"
+import DeviceManagement from "../DeviceManagement"
 
 // eslint-disable-next-line new-cap
 const deviceRoutes = express.Router()
@@ -19,13 +20,11 @@ const registerDevice = async (req: Request, res: Response, next: NextFunction) =
         const deviceName = getDataFromAny(req, "deviceName")
         if (deviceName == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
 
-        const device = new Device()
-        device.name = deviceName
-        device.state = DeviceState.RUNNING
-        device.auth_key = Device.generateDeviceToken()
-        await device.save()
+        // @ts-ignore
+        const owner = req.owner as User
+        if (owner == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
 
-        console.log(device)
+        const device = await DeviceManagement.createDevice({ name: deviceName, owner: owner })
 
         return res.status(ReturnCode.OK).json({ token: device.auth_key })
     } catch (e) {
@@ -78,7 +77,9 @@ const pushSystemStatus = async (req: Request, res: Response, next: NextFunction)
 
         // @ts-ignore
         const device1 = req.device
-        const device = await Device.findOne(device1.id, { relations: ["status", "status.ipAddresses"] })
+        const device = await Device.findOne(device1.id, {
+            relations: ["status", "status.ipAddresses"]
+        })
 
         const statusParsed = JSON.parse(status) as ISystemStatus
         if (device.status != undefined) {
@@ -105,8 +106,10 @@ const listDevices = async (req: Request, res: Response, next: NextFunction) => {
         const devices = await Device.find()
         const devicesSend = devices.map((device) => {
             const deviceSend: any = Object.assign({}, device)
-            if ((Date.now() - deviceSend.lastSeen.getTime()) / 1000 < 1000 &&
-                deviceSend.state == DeviceState.UNKNOWN)
+            if (
+                (Date.now() - deviceSend.lastSeen.getTime()) / 1000 < 1000 &&
+                deviceSend.state == DeviceState.UNKNOWN
+            )
                 deviceSend.state = DeviceState.RUNNING
             deviceSend.auth_key = undefined
             return deviceSend
@@ -131,16 +134,17 @@ const listDeviceIDs = async (req: Request, res: Response, next: NextFunction) =>
     }
 }
 
-
 const getDeviceStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // @ts-ignore
         const deviceID = getDataFromAny(req, "deviceID")
         if (deviceID == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
-        const status = (await Device.findOne({
-            where: { id: deviceID },
-            relations: ["status", "status.ipAddresses"]
-        }))?.status
+        const status = (
+            await Device.findOne({
+                where: { id: deviceID },
+                relations: ["status", "status.ipAddresses"]
+            })
+        )?.status
         if (status == undefined) return res.status(ReturnCode.BAD_REQUEST).end()
 
         return res.status(ReturnCode.OK).json(status)
@@ -159,7 +163,10 @@ export const getBasicDevice = async (req: Request, res: Response, next: NextFunc
         if (device == undefined) return res.status(ReturnCode.BAD_REQUEST).end()
 
         const deviceSend: any = Object.assign({}, device)
-        if ((Date.now() - deviceSend.lastSeen.getTime()) / 1000 / 60 < 1000 && deviceSend.state == DeviceState.UNKNOWN)
+        if (
+            (Date.now() - deviceSend.lastSeen.getTime()) / 1000 / 60 < 1000 &&
+            deviceSend.state == DeviceState.UNKNOWN
+        )
             deviceSend.state = DeviceState.RUNNING
 
         deviceSend.auth_key = undefined
@@ -185,7 +192,6 @@ export const getSoftwareUpdates = async (req: Request, res: Response, next: Next
         return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
     }
 }
-
 
 deviceRoutes.post("/registerDevice", checkRegistrationToken, registerDevice)
 deviceRoutes.post("/pushSystemUpdates", checkDeviceToken, pushSystemUpdates)

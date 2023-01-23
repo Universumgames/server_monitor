@@ -1,9 +1,7 @@
 import DeviceManagement from "DeviceManagement"
-import { Device } from "./entities/Device"
+import { Device, Group, User } from "./entities/entities"
 import UserManagement from "./UserManagement"
-import { Group } from "./entities/Group"
 import { userIsAdmin } from "./helper"
-import { User } from "./entities/User"
 
 /**
  * Group management class
@@ -81,8 +79,7 @@ export default class GroupManagement {
         const device = await DeviceManagement.getDevice({ id: data.deviceId })
         const group = await GroupManagement.getGroup({ id: data.groupId })
         if (device == undefined || group == undefined) return undefined
-        if (device.groups == undefined) device.groups = []
-        device.groups.push(group)
+        device.group = group
         await device.save()
         return await group.save()
     }
@@ -92,15 +89,14 @@ export default class GroupManagement {
      * @param {{string, string}} data device and group data
      * @return {Group | undefined} the group the device was removed from or undefined
      */
-    static async removeDeviceFromGroup(data: {
+    static async moveDeviceToGroup(data: {
         deviceId: string
         groupId: string
     }): Promise<Group | undefined> {
         const device = await DeviceManagement.getDevice({ id: data.deviceId })
         const group = await GroupManagement.getGroup({ id: data.groupId })
         if (device == undefined || group == undefined) return undefined
-        if (device.groups == undefined) device.groups = []
-        device.groups = device.groups.filter((g) => g.id != group.id)
+        device.group = group
         await device.save()
         return await group.save()
     }

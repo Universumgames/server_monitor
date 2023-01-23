@@ -1,15 +1,6 @@
 /* eslint-disable new-cap */
 import { IGroup } from "server_mgt-lib/types"
-import {
-    Entity,
-    Column,
-    PrimaryGeneratedColumn,
-    BaseEntity,
-    OneToMany,
-    OneToOne,
-    JoinColumn,
-    ManyToMany
-} from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, BaseEntity, JoinColumn, ManyToMany } from "typeorm"
 import { User } from "./User"
 
 @Entity()

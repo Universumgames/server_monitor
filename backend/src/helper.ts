@@ -1,8 +1,36 @@
-import { User } from "./entities/User"
-import { Request } from "express"
+import { User, UserSession } from "./entities/entities"
+import { CookieOptions, Request, Response } from "express"
 import { config } from "./monitor_config"
 
 export const cookieName = "server_monitor_data"
+
+/**
+ * create cookie config with expiration date
+ * @param {UserSession} session the user session
+ * @return {CookieConfig} necessary cookie config for express
+ */
+export function cookieConfig(session: UserSession): CookieOptions {
+    return { httpOnly: true, sameSite: "strict", expires: session.expires }
+}
+
+/**
+ * Add cookie to response
+ * @param {express.Response} res the express response process
+ * @param {UserSession} session the user session
+ * @return {express.Response} the express response process
+ */
+export function addSessionCookie(res: Response, session: UserSession): Response {
+    return res.cookie(cookieName, { sessionToken: session.token }, cookieConfig(session))
+}
+
+/**
+ * Get cookie from request
+ * @param {express.Request} req the express request process
+ * @return {Cookie} the cookie
+ */
+export function getSessionToken(req: Request): string | undefined {
+    return getDataFromAny(req, "sessionToken")
+}
 
 /**
  * Get deviceToken from cookie or from request body
@@ -36,15 +64,6 @@ export function getDataFromAny(req: Request, dataKey: string): string | undefine
 }
 
 /**
- * check if a register token for registering a new device is valid
- * @param {string} registerToken the token to check
- * @return {boolean} true, when token is valid, false otherwise
- */
-export function registerTokenIsValid(registerToken: string): boolean {
-    return registerToken == ""
-}
-
-/**
  * check if a user is admin
  * @param {User} user the user to check
  * @return {boolean} true, when user is admin, false otherwise
@@ -59,5 +78,5 @@ export function userIsAdmin(user: User): boolean {
  * @return {boolean} true, when user is super admin, false otherwise
  */
 export function userIsSuperAdmin(user: User): boolean {
-    return config.superAdminMail.toLowerCase() == user.email.toLowerCase()
+    return config.superAdmin.mail.toLowerCase() == user.email.toLowerCase()
 }

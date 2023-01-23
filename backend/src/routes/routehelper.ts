@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express"
-import { getDataFromAny, getDeviceToken, registerTokenIsValid } from "../helper"
+import { getDataFromAny, getDeviceToken } from "../helper"
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
-import { Device } from "../entities/Device"
+import { Device, DeviceRegistrationToken } from "../entities/entities"
 
 export const checkDeviceToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -42,10 +42,16 @@ export const checkRegistrationToken = async (req: Request, res: Response, next: 
 
         if (registerToken == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
 
+        const registrationToken = await DeviceRegistrationToken.findOne({
+            where: { token: registerToken },
+            relations: ["owner"]
+        })
         // @ts-ignore
-        req.registrationToken = registerToken
+        req.owner = registerToken.owner
+        // @ts-ignore
+        req.registrationToken = registrationToken
         // check register validity
-        if (!registerTokenIsValid(registerToken)) next()
+        if (registerToken != undefined) next()
     } catch (e) {
         console.error(e)
         return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()

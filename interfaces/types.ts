@@ -6,7 +6,8 @@ export interface IDevice {
     state: DeviceState
     status: ISystemStatus
     software: IDeviceSoftware[]
-    groups: IGroup[]
+    group: IGroup
+    owner: IUser
 }
 
 export enum DeviceState {
@@ -51,7 +52,9 @@ export interface IUser {
     email: string
     admin: boolean
 
+    owns: IDevice[]
     groups: IGroup[]
+    userGroup: IGroup
 }
 
 export interface IGroup {
