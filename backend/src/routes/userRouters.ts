@@ -2,9 +2,9 @@ import { UserSession } from "../entities/UserSession"
 import express, { NextFunction, Request, Response } from "express"
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
 import UserManagement from "../UserManagement"
-import { addSessionCookie, getDataFromAny, userIsAdmin } from "../helper"
+import { addSessionCookie, cookieName, getDataFromAny, userIsAdmin } from "../helper"
 import { checkAdmin, checkLoggedIn } from "./routehelper"
-import { User } from "entities/User"
+import { User } from "../entities/User"
 
 // eslint-disable-next-line new-cap
 const userRoutes = express.Router()
@@ -17,9 +17,9 @@ const userRoutes = express.Router()
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const mail = getDataFromAny(req, "mail")
+        const requestMailData = getDataFromAny(req, "requestMailData")
         const token = getDataFromAny(req, "token")
-        if (mail == undefined && token == undefined)
+        if (requestMailData == undefined && token == undefined)
             return res.status(ReturnCode.MISSING_PARAMS).end()
 
         if (token != undefined) {
@@ -29,8 +29,10 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             if (session == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
             return addSessionCookie(res.status(ReturnCode.OK), session).end()
         } else {
-            const user = await UserManagement.getUser({ mail: mail })
-            if (user == undefined) return res.status(ReturnCode.BAD_REQUEST).end()
+            let user = await UserManagement.getUser({ mail: requestMailData })
+            if (user == undefined)
+                user = await UserManagement.getUser({ username: requestMailData })
+            if (user == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
             await UserManagement.createAndSendLoginMail({ user, req })
             return res.status(ReturnCode.OK).end()
         }
@@ -46,6 +48,22 @@ const isLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
         return req.user != undefined
             ? res.status(ReturnCode.OK).end()
             : res.status(ReturnCode.UNAUTHORIZED).end()
+    } catch (error) {
+        console.error(error)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
+}
+
+const logout = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // @ts-ignore
+        const user = req.user as User
+        if (user == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
+
+        const session = await UserSession.findOne({ user: user })
+        if (session == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
+        await session.remove()
+        return res.status(ReturnCode.OK).clearCookie(cookieName).end()
     } catch (error) {
         console.error(error)
         return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
@@ -89,6 +107,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
 }
 
 userRoutes.all("/login", login)
+userRoutes.get("/logout", checkLoggedIn, logout)
 userRoutes.get("/isLoggedIn", checkLoggedIn, isLoggedIn)
 userRoutes.get("/basicUserData", checkLoggedIn, getBasicUserData)
 userRoutes.post("/createUser", checkLoggedIn, checkAdmin, createUser)

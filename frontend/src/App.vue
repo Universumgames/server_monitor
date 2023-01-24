@@ -217,4 +217,24 @@
         white-space: -o-pre-wrap; /* Opera 7 */
         word-wrap: break-word; /* Internet Explorer 5.5+ */
     }
+
+    .error {
+        color: var(--error-color);
+    }
+
+    .success {
+        color: var(--success-color);
+    }
+
+    .highlightContainer {
+        background: var(--secondary-color);
+        padding: 1rem;
+        border-radius: 1ch;
+    }
+
+    .slimHighlightContainer {
+        background: var(--secondary-color);
+        padding: 0.5rem;
+        border-radius: 1ch;
+    }
 </style>

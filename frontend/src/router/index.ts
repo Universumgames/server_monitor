@@ -22,7 +22,8 @@ const routes = [
             {
                 path: "/",
                 name: "Devices",
-                component: () => import(/* webpackChunkName: "devices" */ "../views/DeviceList.vue"),
+                component: () =>
+                    import(/* webpackChunkName: "devices" */ "../views/DeviceList.vue"),
                 meta: {
                     title: "Devicelist"
                 }
@@ -30,7 +31,8 @@ const routes = [
             {
                 path: "/devices/:id",
                 name: "Device",
-                component: () => import(/* webpackChunkName: "device" */ "../views/DeviceDetails.vue"),
+                component: () =>
+                    import(/* webpackChunkName: "device" */ "../views/DeviceDetails.vue"),
                 meta: {
                     title: "Device Details"
                 }
@@ -42,17 +44,26 @@ const routes = [
                 meta: {
                     title: "Login"
                 }
+            },
+            {
+                path: "/usermanagement",
+                name: "Usermanagement",
+                component: () =>
+                    import(/* webpackChunkName: "usermanagement" */ "../views/UserManagement.vue"),
+                meta: {
+                    title: "Usermanagement"
+                }
             }
         ]
     },
     {
         path: "/overview/:id?",
-        component: () => import(/* webpackChunkName: "layout" */ "../views/DeviceOverviewStandalone.vue"),
+        component: () =>
+            import(/* webpackChunkName: "layout" */ "../views/DeviceOverviewStandalone.vue"),
         meta: {
             title: "Device Overview"
         }
     }
-
 ]
 
 const router = createRouter({

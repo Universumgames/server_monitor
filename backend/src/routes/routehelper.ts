@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express"
-import { cookieName, getDataFromAny, getDeviceToken, getSessionToken } from "../helper"
+import { cookieName, getDataFromAny, getDeviceToken, getSessionToken, userIsAdmin } from "../helper"
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
 import { Device, DeviceRegistrationToken, User, UserSession } from "../entities/entities"
 import UserManagement from "../UserManagement"
@@ -58,7 +58,7 @@ export const checkAdmin = async (req: Request, res: Response, next: NextFunction
         // @ts-ignore
         const user = req.user as User
         if (user == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
-        if (!user.admin) return res.status(ReturnCode.UNAUTHORIZED).end()
+        if (!userIsAdmin(user)) return res.status(ReturnCode.UNAUTHORIZED).end()
         next()
     } catch (e) {
         console.error(e)

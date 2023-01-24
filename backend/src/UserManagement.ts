@@ -37,7 +37,18 @@ export default class UserManagement {
 
         return await User.findOne({
             where: { ...whereClause },
-            relations: [...["groups", "userGroup"], ...additionalRelations]
+            relations: Array.from(new Set([...["groups", "userGroup"], ...additionalRelations]))
+        })
+    }
+
+    /**
+     * get all users
+     * @param {string[]} additionalRelations user data to find user
+     * @return {User[]} the users
+     */
+    static async getUsers(additionalRelations: string[] = []): Promise<User[]> {
+        return await User.find({
+            relations: Array.from(new Set([...["groups", "userGroup"], ...additionalRelations]))
         })
     }
 
@@ -50,10 +61,11 @@ export default class UserManagement {
         const user = new User()
         user.username = data.username
         user.email = data.email
+        await user.save()
         const userGroup = new Group()
         userGroup.name = data.username
-        userGroup.owner = user
         await userGroup.save()
+        user.groups = [userGroup]
         user.userGroup = userGroup
         await user.save()
         return user

@@ -5,6 +5,8 @@ import { Device, DeviceSoftware } from "../entities/entities"
 import deviceRoutes from "./deviceRoutes"
 import { getDataFromAny } from "../helper"
 import userRoutes from "./userRouters"
+import { checkAdmin, checkLoggedIn } from "./routehelper"
+import adminRoutes from "./adminRoutes"
 
 // eslint-disable-next-line new-cap
 const apiRoutes = express.Router()
@@ -76,6 +78,7 @@ apiRoutes.use("/user", userRoutes)
 apiRoutes.post("/registerDevice", testRegisterDevice)
 apiRoutes.post("/registerSoftware", testRegisterSoftware)
 apiRoutes.post("/pushSystemUpdates", testPushSystemUpdates)
+apiRoutes.use("/admin", checkLoggedIn, checkAdmin, adminRoutes)
 apiRoutes.get("/getAllDevices", testGetAllDevices)
 apiRoutes.get("/getAllSoftware", testGetAllSoftware)
 apiRoutes.get("/clearAllDevices", testClearAllDevices)

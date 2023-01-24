@@ -2,64 +2,58 @@
     <div id="nav">
         <router-link to="/">Home</router-link>
         <router-link to="/login" v-show="!loggedIn">Login</router-link>
+        <router-link to="/usermanagement" v-show="admin">Usermanagement</router-link>
         <a @click="logout" v-show="loggedIn">Logout</a>
     </div>
-    <router-view />
-    <footer class="footer">
-        <label>Created by universumgames</label><br />
-        <a href="https://universegame.de">Website</a>
-        <a href="https://github.com/universumgames">Github</a>
-        <a
-            :href="'https://universegame.de/bug?app=server_monitor&v=' + bugreportVersion"
-            target="_blank"
-            >Bugreport</a
-        >
-        <router-link to="/privacy">Privacy</router-link>
-        <router-link to="/siteNotice">Impressum</router-link>
-        <a href="https://mt32.net" target="_blank">Blog</a>
-        <br />
-        <a href="https://git.mt32.net/universum/server_monitor" target="_blank">Source</a>
-
-        <br />
-        <a href="https://www.buymeacoffee.com/universum" target="_blank"
-            ><img
-                src="https://cdn.buymeacoffee.com/buttons/default-orange.png"
-                alt="Buy Me A Coffee"
-                height="41"
-                width="174"
-                loading="lazy"
-        /></a>
-        <br />
-        <p>Frontend-Version {{ frontendVersion }}</p>
-        <p>Backend-Version {{ backendVersion }}</p>
-    </footer>
+    <router-view @login="onLogin" :user="user" />
+    <Footer :frontendVersion="frontendVersion" :backendVersion="backendVersion" />
 </template>
 
 <script lang="ts">
+    import { IUser } from "server_mgt-lib/types"
     import { Options, Vue } from "vue-class-component"
-    import { isLoggedIn } from "./helper/requests"
-    import { getServerInfo } from "./helper/requests"
+    import { isLoggedIn, logout } from "./helper/requests"
+    import { getServerInfo, getBasicUser } from "./helper/requests"
+    import Footer from "./components/Footer.vue"
 
-    @Options({})
+    @Options({
+        components: {
+            Footer
+        }
+    })
     export default class InteractiveApp extends Vue {
         loggedIn: boolean = false
+        admin: boolean = false
 
         frontendVersion = "0.1.0"
         backendVersion = "unknown"
 
+        user?: IUser = undefined
+
         async created() {
+            this.getData()
+        }
+
+        async getData() {
             this.loggedIn = await isLoggedIn()
             this.backendVersion = (await getServerInfo()).version
+            if (!this.loggedIn) {
+                this.$router.push({ name: "Login" })
+            }
+            this.user = await getBasicUser()
+
+            this.admin = this.user?.admin ?? false
         }
 
         async logout() {
-            // TODO implement logout
+            await logout()
         }
 
-        get bugreportVersion() {
-            return encodeURIComponent(
-                "Frontend " + this.frontendVersion + ", Backend " + this.backendVersion
-            )
+        async onLogin(data: any) {
+            if (data != true) return
+            this.loggedIn = true
+            this.getData()
+            this.$router.push({ name: "Devices" })
         }
     }
 </script>

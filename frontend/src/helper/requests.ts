@@ -10,6 +10,50 @@ export async function getServerInfo(): Promise<any> {
     }
 }
 
+export async function getBasicUser(): Promise<types.IUser | undefined> {
+    try {
+        const response = await fetch("/api/user/basicUserData")
+        return await response.json()
+    } catch (e) {
+        console.error(e)
+        return undefined
+    }
+}
+
+export async function loginOrRequestMail(data: {
+    token?: string
+    requestMailData?: string
+}): Promise<boolean> {
+    try {
+        const response = await fetch("/api/user/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                requestMailData: data.requestMailData,
+                token: data.token
+            })
+        })
+        return response.ok
+    } catch (e) {
+        console.error(e)
+        return false
+    }
+}
+
+export async function logout(): Promise<boolean> {
+    try {
+        const response = await fetch("/api/user/logout", {
+            method: "POST"
+        })
+        return response.ok
+    } catch (e) {
+        console.error(e)
+        return false
+    }
+}
+
 export async function getDevices(): Promise<types.IDevice[] | undefined> {
     try {
         const response = await fetch("/api/device/list")

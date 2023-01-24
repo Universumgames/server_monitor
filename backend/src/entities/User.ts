@@ -39,7 +39,7 @@ export class User extends BaseEntity implements IUser {
     @OneToMany((type) => Device, (device) => device.owner)
     owns: Device[]
 
-    @OneToOne((type) => Device, (device) => device.owner)
+    @OneToOne((type) => Group)
     @JoinColumn()
     userGroup: Group
 
