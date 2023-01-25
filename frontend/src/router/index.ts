@@ -7,23 +7,9 @@ const routes = [
         component: () => import(/* webpackChunkName: "layout" */ "../InteractiveApp.vue"),
         children: [
             {
-                path: "/home",
-                name: "Home",
-                component: Home
-            },
-            {
-                path: "/about",
-                name: "About",
-                // route level code-splitting
-                // this generates a separate chunk (about.[hash].js) for this route
-                // which is lazy-loaded when the route is visited.
-                component: () => import(/* webpackChunkName: "about" */ "../views/About.vue")
-            },
-            {
                 path: "/",
                 name: "Devices",
-                component: () =>
-                    import(/* webpackChunkName: "devices" */ "../views/DeviceList.vue"),
+                component: () => import("../views/DeviceList.vue"),
                 meta: {
                     title: "Devicelist"
                 }
@@ -31,8 +17,7 @@ const routes = [
             {
                 path: "/devices/:id",
                 name: "Device",
-                component: () =>
-                    import(/* webpackChunkName: "device" */ "../views/DeviceDetails.vue"),
+                component: () => import("../views/DeviceDetails.vue"),
                 meta: {
                     title: "Device Details"
                 }
@@ -40,18 +25,45 @@ const routes = [
             {
                 path: "/login",
                 name: "Login",
-                component: () => import(/* webpackChunkName: "login" */ "../views/Login.vue"),
+                component: () => import("../views/Login.vue"),
                 meta: {
                     title: "Login"
                 }
             },
             {
-                path: "/usermanagement",
-                name: "Usermanagement",
-                component: () =>
-                    import(/* webpackChunkName: "usermanagement" */ "../views/UserManagement.vue"),
+                path: "/management",
+                name: "Management",
+                component: () => import("../views/Management/Management.vue"),
                 meta: {
-                    title: "Usermanagement"
+                    title: "Management"
+                },
+                children: [
+                    {
+                        path: "user",
+                        name: "Usermanagement",
+                        component: () => import("../views/Management/UserManagement.vue")
+                    },
+                    {
+                        path: "group",
+                        name: "Groupmanagement",
+                        component: () => import("../views/Management/GroupManagement.vue")
+                    }
+                ]
+            },
+            {
+                path: "/siteNotice",
+                name: "SiteNotice",
+                component: () => import("../views/SiteNotice.vue"),
+                meta: {
+                    title: "Site Notice"
+                }
+            },
+            {
+                path: "/register/:token?",
+                name: "Register new Device",
+                component: () => import("../views/DeviceRegistration.vue"),
+                meta: {
+                    title: "Register new Device"
                 }
             }
         ]

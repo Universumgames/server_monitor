@@ -1,6 +1,7 @@
 <template>
     <div>
         <h1>Devices</h1>
+        <router-link to="/register">Register new Device</router-link>
         <LoadingScreen v-show="loading" />
 
         <div id="deviceOverviewContainer">

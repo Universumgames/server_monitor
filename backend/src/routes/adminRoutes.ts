@@ -3,6 +3,8 @@ import { ReturnCode } from "server_mgt-lib/ReturnCode"
 import UserManagement from "../UserManagement"
 import { getDataFromAny } from "../helper"
 import DeviceManagement from "../DeviceManagement"
+import GroupManagement from "../GroupManagement"
+import * as managementResponses from "server_mgt-lib/management/responses"
 
 // eslint-disable-next-line new-cap
 const adminRoutes = express.Router()
@@ -72,7 +74,28 @@ const getUser = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const getGroup = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const groupId = getDataFromAny(req, "groupId")
+        if (groupId == undefined) {
+            const groups = await GroupManagement.getGroups()
+            const notUserGroupGroups = await GroupManagement.getGroupsNotUserGroup()
+            return res.status(ReturnCode.OK).json({
+                groups: groups,
+                notUserGroupGroups: notUserGroupGroups
+            } as managementResponses.AllDeviceResponse)
+        }
+        const group = await GroupManagement.getGroup({ id: groupId })
+        if (group == undefined) return res.status(ReturnCode.BAD_REQUEST).end()
+        return res.status(ReturnCode.OK).json(group)
+    } catch (error) {
+        console.error(error)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
+}
+
 adminRoutes.post("/user", userOperations)
 adminRoutes.get("/user", getUser)
+adminRoutes.get("/group", getGroup)
 
 export default adminRoutes

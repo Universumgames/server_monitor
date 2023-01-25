@@ -5,6 +5,7 @@ import UserManagement from "../UserManagement"
 import { addSessionCookie, cookieName, getDataFromAny, userIsAdmin } from "../helper"
 import { checkAdmin, checkLoggedIn } from "./routehelper"
 import { User } from "../entities/User"
+import DeviceManagement from "DeviceManagement"
 
 // eslint-disable-next-line new-cap
 const userRoutes = express.Router()

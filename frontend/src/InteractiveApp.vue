@@ -2,7 +2,7 @@
     <div id="nav">
         <router-link to="/">Home</router-link>
         <router-link to="/login" v-show="!loggedIn">Login</router-link>
-        <router-link to="/usermanagement" v-show="admin">Usermanagement</router-link>
+        <router-link to="/management" v-show="admin">Management</router-link>
         <a @click="logout" v-show="loggedIn">Logout</a>
     </div>
     <router-view @login="onLogin" :user="user" />

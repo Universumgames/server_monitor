@@ -1,4 +1,5 @@
 import * as types from "server_mgt-lib/types"
+import * as responses from "server_mgt-lib/responses"
 
 export async function getServerInfo(): Promise<any> {
     try {
@@ -130,5 +131,31 @@ export async function isLoggedIn(): Promise<boolean> {
     } catch (e) {
         console.error(e)
         return false
+    }
+}
+
+export async function createDeviceRegistrationToken(): Promise<
+    responses.CreateDeviceRegistrationResponse | undefined
+> {
+    try {
+        const response = await fetch("/api/device/createDeviceRegistrationToken", {
+            method: "POST"
+        })
+        return await response.json()
+    } catch (e) {
+        console.error(e)
+        return undefined
+    }
+}
+
+export async function checkDeviceRegistrationToken(
+    token: string
+): Promise<responses.CheckDeviceRegistrationResponse | undefined> {
+    try {
+        const response = await fetch(`/api/device/checkDeviceRegistrationToken?token=${token}`)
+        return await response.json()
+    } catch (e) {
+        console.error(e)
+        return undefined
     }
 }

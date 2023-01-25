@@ -34,6 +34,10 @@
         users: IUser[] = []
 
         async created() {
+            await this.getData()
+        }
+
+        async getData() {
             this.users = (await adminRequests.getUsers()) ?? []
         }
 
@@ -44,10 +48,14 @@
         }
 
         async createUser(user: IUser) {
-            await adminRequests.createUser({
+            const response = await adminRequests.createUser({
                 username: user.username,
                 email: user.email
             })
+            if (response != undefined) {
+                this.creatingUser = false
+                await this.getData()
+            }
         }
     }
 </script>

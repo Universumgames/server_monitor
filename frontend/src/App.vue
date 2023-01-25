@@ -143,6 +143,7 @@
         --alert-color: #ba4b4a;
         --error-color: var(--alert-color);
         --success-color: var(--primary-color);
+        --disabled-color: gray;
     }
 
     .darkVars {
@@ -154,6 +155,7 @@
         --alert-color: #ba4b4a;
         --error-color: var(--alert-color);
         --success-color: var(--primary-color);
+        --disabled-color: darkgray;
     }
 
     header {
@@ -203,7 +205,7 @@
     }
 
     .btn-disabled {
-        background-color: gray !important;
+        background-color: var(--disabled-color) !important;
     }
 
     .delete {

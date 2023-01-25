@@ -1,4 +1,4 @@
-import { User, Device } from "./entities/entities"
+import { User, Device, DeviceRegistrationToken } from "./entities/entities"
 import { DeviceState } from "server_mgt-lib/types"
 import UserManagement from "./UserManagement"
 import { userIsAdmin } from "./helper"
@@ -71,12 +71,16 @@ export default class DeviceManagement {
      * @param {{string, User}} data device data to create device
      * @return {Device} the created device
      */
-    static async createDevice(data: { name: string; owner: User }): Promise<Device> {
+    static async createDevice(data: { name: string; ownerId: string }): Promise<Device> {
+        const user = await UserManagement.getUser({ id: data.ownerId })
         const device = new Device()
         device.name = data.name
-        device.owner = data.owner
+        device.owner = user!
         device.state = DeviceState.RUNNING
         device.auth_key = Device.generateDeviceToken()
+        device.group = user!.userGroup
+        console.log(device)
+
         return await device.save()
     }
 
@@ -87,12 +91,13 @@ export default class DeviceManagement {
      * @return {Device[]} the devices
      */
     static async getDevicesAccessibleByUser(
-        data: { userId: string },
+        data: { userId: string; considerAdmin?: boolean },
         additionalRelations: string[] = []
     ): Promise<Device[]> {
         const user = await UserManagement.getUser({ id: data.userId }, ["groups"])
         if (user == undefined) return []
-        if (userIsAdmin(user)) return await this.getAllDevices(additionalRelations)
+        if (userIsAdmin(user) && data.considerAdmin)
+            return await this.getAllDevices(additionalRelations)
         const allDevices = []
         for (const group of user.groups) {
             allDevices.push(...(await this.getDevices({ groupId: group.id }, additionalRelations)))
@@ -110,5 +115,24 @@ export default class DeviceManagement {
             if (device.owner == undefined) return false
             return device.owner.id == data.userId
         })
+    }
+
+    /**
+     * Create a new device registration token.
+     * @param {{string}} data user data to create device registration token
+     * @return {DeviceRegistrationToken | undefined} the created device registration token or undefined
+     */
+    static async createDeviceRegistrationToken(data: {
+        userId: string
+    }): Promise<DeviceRegistrationToken | undefined> {
+        const user = await UserManagement.getUser({ id: data.userId })
+        if (user == undefined) return undefined
+        const registrationToken = new DeviceRegistrationToken()
+        registrationToken.user = user
+        const expiration = new Date()
+        expiration.setHours(expiration.getHours() + 1)
+        registrationToken.expires = expiration
+        registrationToken.device = undefined
+        return await registrationToken.save()
     }
 }

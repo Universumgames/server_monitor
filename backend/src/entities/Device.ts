@@ -36,7 +36,7 @@ export class Device extends BaseEntity implements IDevice {
     @Column({ type: "enum", enum: DeviceState, default: DeviceState.UNKNOWN })
     state: DeviceState = DeviceState.UNKNOWN
 
-    @OneToOne((type) => SystemStatus, (status) => status.device)
+    @OneToOne((type) => SystemStatus, (status) => status.device, { nullable: true })
     @JoinColumn()
     status: SystemStatus
 

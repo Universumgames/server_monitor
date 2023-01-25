@@ -1,4 +1,4 @@
-import DeviceManagement from "DeviceManagement"
+import DeviceManagement from "./DeviceManagement"
 import { Device, Group, User } from "./entities/entities"
 import UserManagement from "./UserManagement"
 import { userIsAdmin } from "./helper"
@@ -14,6 +14,43 @@ export default class GroupManagement {
      */
     static async getGroup(data: { id?: string; name?: string }): Promise<Group | undefined> {
         return await Group.findOne({ where: { id: data.id, name: data.name } })
+    }
+
+    /**
+     * get all groups
+     * @return {Group[]} all groups
+     */
+    static async getGroups(): Promise<Group[]> {
+        return await Group.find()
+    }
+
+    /**
+     * get all groups that are not user groups
+     * @return {Group[]} all groups that are not user groups
+     */
+    static async getGroupsNotUserGroup(): Promise<Group[]> {
+        const allGroups = await this.getGroups()
+        const userGroups = await this.getUserGroups()
+        return allGroups.filter((g) => !userGroups.map((ug) => ug.id).includes(g.id))
+    }
+
+    /**
+     * get all user groups
+     * @return {Group[]} all user groups
+     */
+    static async getUserGroups(): Promise<Group[]> {
+        return (await UserManagement.getUsers(["userGroup"])).map((u) => u.userGroup)
+    }
+
+    /**
+     * get single user group from user id
+     * @param {{string}} data user data
+     * @return {Group} the main group the user is in
+     */
+    static async getUserGroup(data: { userId: string }): Promise<Group | undefined> {
+        const user = await UserManagement.getUser({ id: data.userId }, ["userGroup"])
+        if (user == undefined) return undefined
+        return user.userGroup
     }
 
     /**
@@ -145,16 +182,5 @@ export default class GroupManagement {
             userId: data.userId
         })
         return devices.some((d) => d.id == data.deviceId)
-    }
-
-    /**
-     * get single user group from user id
-     * @param {{string}} data user data
-     * @return {Group} the main group the user is in
-     */
-    static async getUserGroup(data: { userId: string }): Promise<Group | undefined> {
-        const user = await UserManagement.getUser({ id: data.userId }, ["userGroup"])
-        if (user == undefined) return undefined
-        return user.userGroup
     }
 }

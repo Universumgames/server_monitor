@@ -68,20 +68,26 @@ export const checkAdmin = async (req: Request, res: Response, next: NextFunction
 
 export const checkRegistrationToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const registerToken = getDataFromAny(req, "registerToken")
+        const registerTokenParam = getDataFromAny(req, "registerToken")
 
-        if (registerToken == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
+        if (registerTokenParam == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
 
         const registrationToken = await DeviceRegistrationToken.findOne({
-            where: { token: registerToken },
-            relations: ["owner"]
+            where: { token: registerTokenParam },
+            relations: ["user"]
         })
+
+        if (registrationToken == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
+        if (registrationToken.expires < new Date()) {
+            await registrationToken.remove()
+            return res.status(ReturnCode.UNAUTHORIZED).end()
+        }
         // @ts-ignore
-        req.owner = registerToken.owner
+        req.user = registrationToken.user
         // @ts-ignore
         req.registrationToken = registrationToken
         // check register validity
-        if (registerToken != undefined) next()
+        next()
     } catch (e) {
         console.error(e)
         return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()

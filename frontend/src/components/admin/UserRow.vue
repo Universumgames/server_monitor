@@ -4,7 +4,14 @@
             <div class="userRowUsername">{{ user?.username }}</div>
             <div class="userRowEmail">{{ user?.email }}</div>
             <div class="userRowAdmin">{{ user?.admin ? "Admin" : "User" }}</div>
-            <div>Groups: {{ user?.groups.length }}</div>
+            <div>
+                <label @click="showGroups = !showGroups" style="cursor: pointer"
+                    >Groups: {{ user?.groups.length }}</label
+                >
+                <div v-show="showGroups">
+                    <div v-for="group in user?.groups" :key="group.id">{{ group.name }}</div>
+                </div>
+            </div>
 
             <div class="userRowDelete">
                 <button class="delete">Delete</button>
@@ -27,6 +34,8 @@
         user?: IUser = undefined
 
         detailedUser?: IUser = undefined
+
+        showGroups = false
 
         async mounted() {
             this.detailedUser = await adminRequests.getUser(this.user?.id ?? "")
