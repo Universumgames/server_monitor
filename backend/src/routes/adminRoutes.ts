@@ -94,8 +94,32 @@ const getGroup = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const getDevice = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const deviceId = getDataFromAny(req, "deviceId")
+        if (deviceId != undefined) {
+            const device = await DeviceManagement.getDevice({ id: deviceId })
+            if (device == undefined) return res.status(ReturnCode.BAD_REQUEST).end()
+            return res.status(ReturnCode.OK).json(device)
+        }
+        const devices = await DeviceManagement.getAllDevices(["owner", "group"])
+        const query = getDataFromAny(req, "query") as any
+        if (query != undefined && query.filter != undefined) {
+            const filteredDevices = await DeviceManagement.getAllDevicesWithFilter({
+                filter: query.filter
+            })
+            return res.status(ReturnCode.OK).json(filteredDevices)
+        }
+        return res.status(ReturnCode.OK).json(devices)
+    } catch (error) {
+        console.error(error)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
+}
+
 adminRoutes.post("/user", userOperations)
 adminRoutes.get("/user", getUser)
 adminRoutes.get("/group", getGroup)
+adminRoutes.get("/device", getDevice)
 
 export default adminRoutes

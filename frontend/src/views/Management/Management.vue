@@ -2,6 +2,7 @@
     <div id="managementNav">
         <router-link to="/management/user">User</router-link>
         <router-link to="/management/group">Group</router-link>
+        <router-link to="/management/device">Device</router-link>
     </div>
     <router-view />
 </template>

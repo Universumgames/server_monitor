@@ -47,6 +47,11 @@ const routes = [
                         path: "group",
                         name: "Groupmanagement",
                         component: () => import("../views/Management/GroupManagement.vue")
+                    },
+                    {
+                        path: "device",
+                        name: "Devicemanagement",
+                        component: () => import("../views/Management/DeviceManagement.vue")
                     }
                 ]
             },

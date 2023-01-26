@@ -36,7 +36,6 @@
         loading = false
         successString = ""
 
-        // TODO create the login page
         created() {}
 
         get buttonText() {

@@ -3,6 +3,7 @@ import { cookieName, getDataFromAny, getDeviceToken, getSessionToken, userIsAdmi
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
 import { Device, DeviceRegistrationToken, User, UserSession } from "../entities/entities"
 import UserManagement from "../UserManagement"
+import DeviceManagement from "../DeviceManagement"
 
 export const checkDeviceToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -86,7 +87,8 @@ export const checkRegistrationToken = async (req: Request, res: Response, next: 
         req.user = registrationToken.user
         // @ts-ignore
         req.registrationToken = registrationToken
-        // check register validity
+
+        await DeviceManagement.checkAllRegistrationTokensForValidity()
         next()
     } catch (e) {
         console.error(e)

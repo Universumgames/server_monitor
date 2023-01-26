@@ -135,4 +135,38 @@ export default class DeviceManagement {
         registrationToken.device = undefined
         return await registrationToken.save()
     }
+
+    /**
+     * Check all registration tokens if they are still valid.
+     * @return {void}
+     */
+    static async checkAllRegistrationTokensForValidity() {
+        const tokens = await DeviceRegistrationToken.find()
+        for (const token of tokens) {
+            if (token.expires < new Date()) {
+                await token.remove()
+            }
+        }
+    }
+
+    /**
+     * Get all devices with a filter.
+     * @param {{string}} query filter query
+     * @return {Device[]} the devices
+     */
+    static async getAllDevicesWithFilter(query: { filter: string }): Promise<Device[]> {
+        const devices = await DeviceManagement.getAllDevices(["owner", "group"])
+        const filteredDevices = devices.filter((device) => {
+            const filterStr = query.filter.toLowerCase()
+            return (
+                device.name.toLowerCase().includes(filterStr) ||
+                device.id.toLowerCase().includes(filterStr) ||
+                device.owner.email.toLowerCase().includes(filterStr) ||
+                device.owner.username.toLowerCase().includes(filterStr) ||
+                device.group.name.toLowerCase().includes(filterStr) ||
+                device.group.id.toLowerCase().includes(filterStr)
+            )
+        })
+        return filteredDevices
+    }
 }

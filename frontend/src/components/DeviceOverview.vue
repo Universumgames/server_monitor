@@ -130,6 +130,8 @@
                 " Updates available"
             )
         }
+
+        // TODO implement editing of device
     }
 </script>
 

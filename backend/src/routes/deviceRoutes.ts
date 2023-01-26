@@ -71,7 +71,6 @@ const registerDevice = async (req: Request, res: Response, next: NextFunction) =
         const owner = req.user as User
         // @ts-ignore
         const registrationToken = req.registrationToken as DeviceRegistrationToken
-        console.log(registrationToken)
 
         const device = await DeviceManagement.createDevice({ name: deviceName, ownerId: owner.id })
 
@@ -249,6 +248,8 @@ export const getSoftwareUpdates = async (req: Request, res: Response, next: Next
         return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
     }
 }
+
+// TODO add editing of device
 
 deviceRoutes.post("/registerDevice", checkRegistrationToken, registerDevice)
 deviceRoutes.post("/pushSystemUpdates", checkDeviceToken, pushSystemUpdates)
