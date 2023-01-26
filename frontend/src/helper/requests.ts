@@ -90,7 +90,7 @@ export async function getSystemStatus(deviceId: string): Promise<types.ISystemSt
         const response = await fetch(`/api/device/${deviceId}/state`)
         return await response.json()
     } catch (e) {
-        console.error(e)
+        console.warn(e)
         return undefined
     }
 }
@@ -100,7 +100,7 @@ export async function getSoftware(deviceId: string): Promise<types.IDeviceSoftwa
         const response = await fetch(`/api/device/${deviceId}/software`)
         return await response.json()
     } catch (e) {
-        console.error(e)
+        console.warn(e)
         return undefined
     }
 }
@@ -153,6 +153,16 @@ export async function checkDeviceRegistrationToken(
 ): Promise<responses.CheckDeviceRegistrationResponse | undefined> {
     try {
         const response = await fetch(`/api/device/checkDeviceRegistrationToken?token=${token}`)
+        return await response.json()
+    } catch (e) {
+        console.error(e)
+        return undefined
+    }
+}
+
+export async function getDeviceDetails(deviceId: string): Promise<types.IDevice | undefined> {
+    try {
+        const response = await fetch(`/api/device/${deviceId}/details`)
         return await response.json()
     } catch (e) {
         console.error(e)

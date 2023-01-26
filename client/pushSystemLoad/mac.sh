@@ -34,7 +34,7 @@ echo "Load average: $cpuLoadAVG1m (1m), $cpuLoadAVG5m (5m), $cpuLoadAVG15m (15m)
 # get ips of all interfaces with ifconfig
 # source https://stackoverflow.com/a/27557715/9551386 (modified)
 ips=$(ifconfig | grep "inet" | awk '{print $2}')
-ipsJSON=$(echo "$ips" | jq -R -s -c 'split("\n") | [.[] | {ip: .}]')
+ipsJSON=$(echo "$ips" | jq -R -s -c 'split("\n") | [.[] | {ip: (. | split("%") | .[0]), interface: (. | split("%") | .[1])}]')
 
 # generate json
 json=$(jq -n \

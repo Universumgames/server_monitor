@@ -45,7 +45,9 @@ export class SystemStatus extends BaseEntity implements ISystemStatus {
         status.cpuUsage = json.cpuUsage || { avg1m: -1, avg5m: -1, avg15m: -1 }
         status.ipAddresses = []
         if (Array.isArray(json.ipAddresses))
-            status.ipAddresses = json.ipAddresses.map((ip) => SystemIP.copyFromJSON(ip, status))
+            status.ipAddresses = json.ipAddresses
+                .filter((ip) => ip.ip != undefined && ip.ip != "" && ip.ip != " " && ip.ip != null)
+                .map((ip) => SystemIP.copyFromJSON(ip, status))
         status.device = device
         return status
     }

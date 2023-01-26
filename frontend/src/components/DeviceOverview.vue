@@ -1,5 +1,5 @@
 <template>
-    <div class="deviceOverviewContainer">
+    <div class="deviceOverviewContainer" @click="routeToDetails">
         <div v-if="loading || error" class="emptyContainer">
             <BlankDeviceOverview />
         </div>
@@ -131,7 +131,9 @@
             )
         }
 
-        // TODO implement editing of device
+        routeToDetails() {
+            this.$router.push({ name: "DeviceDetails", params: { id: this.deviceId } })
+        }
     }
 </script>
 
@@ -141,6 +143,7 @@
         border-radius: 1ch;
         padding: 1ch;
         text-align: left;
+        cursor: pointer;
     }
 
     .deviceOverviewContainer h3 {

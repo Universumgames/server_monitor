@@ -180,7 +180,12 @@ const listDevices = async (req: Request, res: Response, next: NextFunction) => {
 
 const listDeviceIDs = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const devices = await Device.find()
+        // @ts-ignore
+        const user = req.user as User
+        const devices = await DeviceManagement.getDevicesAccessibleByUser({
+            userId: user.id,
+            considerAdmin: false
+        })
         const devicesSend = devices.map((device) => device.id)
 
         return res.status(ReturnCode.OK).json(devicesSend)
@@ -201,7 +206,7 @@ const getDeviceStatus = async (req: Request, res: Response, next: NextFunction) 
                 relations: ["status", "status.ipAddresses"]
             })
         )?.status
-        if (status == undefined) return res.status(ReturnCode.BAD_REQUEST).end()
+        if (status == undefined) return res.status(ReturnCode.UNPROCESSABLE_ENTITY).end()
 
         return res.status(ReturnCode.OK).json(status)
     } catch (e) {
@@ -249,6 +254,34 @@ export const getSoftwareUpdates = async (req: Request, res: Response, next: Next
     }
 }
 
+export const getDetailedDevice = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // @ts-ignore
+        const user = req.user as User
+        const deviceID = getDataFromAny(req, "deviceID")
+        if (deviceID == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
+
+        const device = await DeviceManagement.getDevice({ id: deviceID }, [
+            "status",
+            "status.ipAddresses",
+            "software"
+        ])
+        if (device == undefined) return res.status(ReturnCode.UNPROCESSABLE_ENTITY).end()
+        if (
+            await DeviceManagement.isAccessibleByUser({
+                deviceId: device.id,
+                userId: user.id,
+                considerAdmin: true
+            })
+        )
+            return res.status(ReturnCode.OK).json(device)
+        else return res.status(ReturnCode.UNAUTHORIZED).end()
+    } catch (e) {
+        console.error(e)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
+}
+
 // TODO add editing of device
 
 deviceRoutes.post("/registerDevice", checkRegistrationToken, registerDevice)
@@ -259,6 +292,7 @@ deviceRoutes.get("/listIDs", checkLoggedIn, listDeviceIDs)
 deviceRoutes.get("/:deviceID/state", checkLoggedIn, getDeviceStatus)
 deviceRoutes.get("/:deviceID/basic", checkLoggedIn, getBasicDevice)
 deviceRoutes.get("/:deviceID/software", checkLoggedIn, getSoftwareUpdates)
+deviceRoutes.get("/:deviceID/details", checkLoggedIn, getDetailedDevice)
 deviceRoutes.post("/createDeviceRegistrationToken", checkLoggedIn, createDeviceRegistrationToken)
 deviceRoutes.get("/checkDeviceRegistrationToken", checkLoggedIn, checkDeviceRegistrationToken)
 

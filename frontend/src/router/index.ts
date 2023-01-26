@@ -12,15 +12,17 @@ const routes = [
                 component: () => import("../views/DeviceList.vue"),
                 meta: {
                     title: "Devicelist"
-                }
-            },
-            {
-                path: "/devices/:id",
-                name: "Device",
-                component: () => import("../views/DeviceDetails.vue"),
-                meta: {
-                    title: "Device Details"
-                }
+                },
+                children: [
+                    {
+                        path: "/devices/:id",
+                        name: "DeviceDetails",
+                        component: () => import("../views/DeviceDetails.vue"),
+                        meta: {
+                            title: "Device Details"
+                        }
+                    }
+                ]
             },
             {
                 path: "/login",

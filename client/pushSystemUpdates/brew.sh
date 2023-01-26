@@ -25,7 +25,7 @@ brew update
 outdatedBrewPackages=$(brew outdated --json | jq . -c)
 
 # change to custom json format
-outdatedBrewPackages=$(echo "$outdatedBrewPackages" | jq -c '{updates: [.[][] | {name: .name, currentVersion: .installed_versions[0], newVersion: .current_version}]}')
+outdatedBrewPackages=$(echo "$outdatedBrewPackages" | jq -c '{updates: [.[][] | {name: .name, currentVersion: (.installed_versions[0]? // .installed_versions), newVersion: .current_version}]}')
 
 # count number of updates
 updateCounts=$(echo "$outdatedBrewPackages" | jq '.[] | length')

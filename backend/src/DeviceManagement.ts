@@ -17,8 +17,11 @@ export default class DeviceManagement {
         data: { id?: string; auth_key?: string },
         additionalRelations: string[] = []
     ): Promise<Device | undefined> {
+        let whereClause: any = {}
+        if (data.id != undefined) whereClause = { ...whereClause, id: data.id }
+        if (data.auth_key != undefined) whereClause = { ...whereClause, auth_key: data.auth_key }
         return await Device.findOne({
-            where: { id: data.id, auth_key: data.auth_key },
+            where: whereClause,
             relations: Array.from(
                 new Set([
                     ...["status", "status.ipAddresses", "group", "owner"],
@@ -79,7 +82,6 @@ export default class DeviceManagement {
         device.state = DeviceState.RUNNING
         device.auth_key = Device.generateDeviceToken()
         device.group = user!.userGroup
-        console.log(device)
 
         return await device.save()
     }
@@ -168,5 +170,27 @@ export default class DeviceManagement {
             )
         })
         return filteredDevices
+    }
+
+    /**
+     * Check if a device is accessible by a user.
+     * @param {{string, string}} data device and user data to check if device is accessible
+     * @return {boolean} true if device is accessible, false otherwise
+     */
+    static async isAccessibleByUser(data: {
+        userId: string
+        deviceId: string
+        considerAdmin?: boolean
+    }): Promise<boolean> {
+        const device = await DeviceManagement.getDevice({ id: data.deviceId }, ["owner"])
+        if (device == undefined) return false
+        if (device.owner.id == data.userId) return true
+        const user = await UserManagement.getUser({ id: data.userId }, ["groups"])
+        if (user == undefined) return false
+        if (userIsAdmin(user) && data.considerAdmin) return true
+        for (const group of user.groups) {
+            if (group.id == device.group.id) return true
+        }
+        return false
     }
 }
