@@ -7,7 +7,7 @@
 
     <div>
         <h2>Userlist</h2>
-        <UserRow v-for="user in users" :key="user.id" :user="user" />
+        <UserRow v-for="user in users" :key="user.id" :user="user" @deleteUser="getData()" />
     </div>
 </template>
 

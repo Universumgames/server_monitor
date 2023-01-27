@@ -160,11 +160,12 @@ export default class UserManagement {
             }
         }
 
+        user.userGroup = null
+        await user.save()
+
         const groupsFromUser = (await GroupManagement.getGroups()).filter(
             (group) => group.owner.id == user.id
         )
-
-        console.log("groups", groupsFromUser)
 
         for (const group of groupsFromUser) {
             const users = await GroupManagement.getUsersInGroup({ groupId: group.id })
@@ -177,17 +178,11 @@ export default class UserManagement {
                 }
             }
 
-            if (group.id == user.userGroup.id) continue
-            console.log("delete group", group.name)
-
             await Group.remove(group)
-            console.log("deleted")
         }
 
         user.groups = []
         await user.save()
-        console.log("delete user", user.username)
-        console.log("usergroup", user.userGroup)
 
         await User.remove(user)
     }

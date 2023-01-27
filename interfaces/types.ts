@@ -54,7 +54,7 @@ export interface IUser {
 
     owns: IDevice[]
     groups: IGroup[]
-    userGroup: IGroup
+    userGroup: IGroup | null
 }
 
 export interface IGroup {

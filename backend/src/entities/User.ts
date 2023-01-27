@@ -44,7 +44,7 @@ export class User extends BaseEntity implements IUser {
 
     @OneToOne((type) => Group, { cascade: true, onDelete: "CASCADE", nullable: true, eager: true })
     @JoinColumn()
-    userGroup: Group
+    userGroup: Group | null
 
     @OneToMany((type) => UserSession, (session) => session.user, {
         cascade: true,

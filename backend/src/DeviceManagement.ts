@@ -81,7 +81,7 @@ export default class DeviceManagement {
         device.owner = user!
         device.state = DeviceState.RUNNING
         device.auth_key = Device.generateDeviceToken()
-        device.group = user!.userGroup
+        device.group = user!.userGroup!
 
         return await device.save()
     }

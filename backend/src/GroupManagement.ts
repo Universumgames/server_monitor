@@ -42,7 +42,7 @@ export default class GroupManagement {
      * @return {Group[]} all user groups
      */
     static async getUserGroups(): Promise<Group[]> {
-        return (await UserManagement.getUsers(["userGroup"])).map((u) => u.userGroup)
+        return (await UserManagement.getUsers(["userGroup"])).map((u) => u.userGroup!)
     }
 
     /**
@@ -53,7 +53,7 @@ export default class GroupManagement {
     static async getUserGroup(data: { userId: string }): Promise<Group | undefined> {
         const user = await UserManagement.getUser({ id: data.userId }, ["userGroup"])
         if (user == undefined) return undefined
-        return user.userGroup
+        return user.userGroup!
     }
 
     /**
