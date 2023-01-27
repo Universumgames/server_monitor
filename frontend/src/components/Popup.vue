@@ -1,6 +1,6 @@
 <template>
     <div class="popupContainer">
-        <button @click="$router.go(-1)">Close</button>
+        <button @click="goBack">Close</button>
         <div class="popupContent">
             <div class="slotStyle">
                 <slot />
@@ -15,7 +15,25 @@
     @Options({
         components: {}
     })
-    export default class Popup extends Vue {}
+    export default class Popup extends Vue {
+        goBack() {
+            this.$router.go(-1)
+        }
+
+        keyup(event: KeyboardEvent) {
+            if (event.key == "Escape") {
+                this.goBack()
+            }
+        }
+
+        mounted(): void {
+            document.addEventListener("keyup", this.keyup)
+        }
+
+        beforeUnmount(): void {
+            document.removeEventListener("keyup", this.keyup)
+        }
+    }
 </script>
 
 <style>

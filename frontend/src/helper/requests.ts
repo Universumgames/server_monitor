@@ -1,5 +1,6 @@
 import * as types from "server_mgt-lib/types"
 import * as responses from "server_mgt-lib/responses"
+import * as requests from "server_mgt-lib/requests"
 
 export async function getServerInfo(): Promise<any> {
     try {
@@ -167,5 +168,77 @@ export async function getDeviceDetails(deviceId: string): Promise<types.IDevice 
     } catch (e) {
         console.error(e)
         return undefined
+    }
+}
+
+export async function editDevice(
+    deviceId: string,
+    edits: requests.DeviceEditRequest
+): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/device/${deviceId}/edit`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(edits)
+        })
+        return response.ok
+        return true
+    } catch (e) {
+        console.error(e)
+        return false
+    }
+}
+
+export async function getAvailableGroups(): Promise<types.IGroup[] | undefined> {
+    try {
+        const response = await fetch("/api/group/list")
+        return await response.json()
+    } catch (e) {
+        console.error(e)
+        return undefined
+    }
+}
+
+export async function getUserGroup(): Promise<types.IGroup | undefined> {
+    try {
+        const response = await fetch("/api/group/userGroup")
+        return await response.json()
+    } catch (e) {
+        console.error(e)
+        return undefined
+    }
+}
+
+export async function getGroupDetails(
+    groupId: string
+): Promise<responses.DetailedGroupResponse | undefined> {
+    try {
+        const response = await fetch(`/api/group/details?groupId=${groupId}`)
+        return await response.json()
+    } catch (e) {
+        console.error(e)
+        return undefined
+    }
+}
+
+export async function addUserToGroup(groupId: string, userMail: string): Promise<boolean> {
+    try {
+        const body: requests.GroupEditRequest = {
+            groupId,
+            newUserMails: [userMail]
+        }
+        const response = await fetch(`/api/group/edit`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        })
+        return response.ok
+    } catch (e) {
+        console.error(e)
+        return false
     }
 }

@@ -1,6 +1,6 @@
 /* eslint-disable new-cap */
 import { IGroup } from "server_mgt-lib/types"
-import { Entity, Column, PrimaryGeneratedColumn, BaseEntity, ManyToOne } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn } from "typeorm"
 import { User } from "./User"
 
 @Entity()
@@ -14,6 +14,6 @@ export class Group extends BaseEntity implements IGroup {
     @Column()
     name: string
 
-    @ManyToOne((type) => User)
+    @ManyToOne((type) => User, (user) => user.ownsGroups)
     owner: User
 }

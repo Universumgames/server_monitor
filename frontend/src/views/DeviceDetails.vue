@@ -13,6 +13,10 @@
                 <label>Uptime: ~{{ uptime }}</label>
                 <label>Last seen: ~{{ lastSeenDiff }} ago</label>
                 <label>Updates: {{ updateCount }}</label>
+                <label
+                    >Group: <GroupChange :device="device" :enabled="user?.id == device?.owner.id"
+                /></label>
+                <label>Owner: {{ device?.owner.username }}</label>
             </div>
             <div class="systemloadContainer">
                 <h2>Load average</h2>
@@ -61,6 +65,16 @@
                         :software="software" />
                 </table>
             </div>
+            <div class="deleteContainer">
+                <button
+                    :class="device?.owner.id == user?.id ? 'delete' : 'disabled'"
+                    @click="deleteDevice()">
+                    Delete device
+                </button>
+                <button v-show="user?.admin" class="delete" @click="deleteDeviceAdmin()">
+                    Delete device admin
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -68,19 +82,27 @@
 <script lang="ts">
     import { Options, Vue } from "vue-class-component"
     import { getDeviceDetails } from "@/helper/requests"
-    import { IDevice, IDeviceSoftware, ISystemIP } from "server_mgt-lib/types"
+    import { IDevice, IDeviceSoftware, ISystemIP, IUser } from "server_mgt-lib/types"
     import { getStatusIndicatorColor } from "@/helper/statusIndicator"
     import StatusIndicator from "@/components/StatusIndicator.vue"
     import Software from "@/components/DeviceDetails/Software.vue"
+    import * as requests from "@/helper/requests"
+    import * as adminRequests from "@/helper/adminRequests"
+    import GroupChange from "@/components/DeviceDetails/GroupChange.vue"
 
     @Options({
+        props: {
+            user: Object
+        },
         components: {
             StatusIndicator,
-            Software
+            Software,
+            GroupChange
         }
     })
     export default class DeviceDetails extends Vue {
         device: IDevice | undefined = undefined
+        user?: IUser
 
         systemUpdates: IDeviceSoftware[] = []
         watchSoftware: IDeviceSoftware[] = []
@@ -169,7 +191,26 @@
             )
         }
 
-        // TODO implement editing of device
+        async deleteDevice() {
+            if (confirm("Are you sure you want to delete this device?")) {
+                await requests.editDevice(this.device?.id ?? "", {
+                    deviceId: this.device?.id ?? "",
+                    delete: true
+                })
+            }
+        }
+
+        async deleteDeviceAdmin() {
+            if (confirm("Are you sure you want to delete this device?")) {
+                await adminRequests.editDevice({
+                    deviceId: this.device?.id ?? "",
+                    edits: {
+                        deviceId: this.device?.id ?? "",
+                        delete: true
+                    }
+                })
+            }
+        }
     }
 </script>
 

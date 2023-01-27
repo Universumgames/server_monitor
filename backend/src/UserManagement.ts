@@ -2,6 +2,8 @@ import { config } from "./monitor_config"
 import { Device, Group, User, UserSession } from "./entities/entities"
 import getMailManager from "./MailManager"
 import { Request } from "express"
+import GroupManagement from "./GroupManagement"
+import Database from "./database"
 
 /**
  * User management class
@@ -64,6 +66,7 @@ export default class UserManagement {
         await user.save()
         const userGroup = new Group()
         userGroup.name = data.username
+        userGroup.owner = user
         await userGroup.save()
         user.groups = [userGroup]
         user.userGroup = userGroup
@@ -123,13 +126,70 @@ export default class UserManagement {
      */
     static async ensureAdminUser(): Promise<void> {
         const admin = await UserManagement.getUser({ mail: config.superAdmin.mail })
-        if (admin != undefined) return
+
+        if (admin != undefined) {
+            // admin.userGroup.owner = admin
+            // await admin.userGroup.save()
+            return
+        }
         const newAdmin = await UserManagement.createUser({
             email: config.superAdmin.mail,
             username: config.superAdmin.username ?? "Admin"
         })
         newAdmin.admin = true
         await newAdmin.save()
+    }
+
+    /**
+     * delete a user
+     * @param {{string}} data user data to find user
+     * @return {void}
+     */
+    static async deleteUser(data: { userId: string }): Promise<void> {
+        const user = await UserManagement.getUser({ id: data.userId }, [
+            "groups",
+            "groups.owner",
+            "userGroup",
+            "userGroup.owner"
+        ])
+        if (user == undefined) return
+        const devices = await UserManagement.getOwnDevices({ id: data.userId })
+        if (devices != undefined) {
+            for (const device of devices) {
+                await device.remove()
+            }
+        }
+
+        const groupsFromUser = (await GroupManagement.getGroups()).filter(
+            (group) => group.owner.id == user.id
+        )
+
+        console.log("groups", groupsFromUser)
+
+        for (const group of groupsFromUser) {
+            const users = await GroupManagement.getUsersInGroup({ groupId: group.id })
+            if (users != undefined) {
+                for (const user of users) {
+                    await GroupManagement.removeUserFromGroup({
+                        userId: user.id,
+                        groupId: group.id
+                    })
+                }
+            }
+
+            if (group.id == user.userGroup.id) continue
+            console.log("delete group", group.name)
+
+            await Group.remove(group)
+            console.log("deleted")
+        }
+
+        user.groups = []
+        await user.save()
+        console.log("delete user", user.username)
+        console.log("usergroup", user.userGroup)
+
+        await User.remove(user)
     }
 }
 

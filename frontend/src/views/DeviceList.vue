@@ -19,8 +19,8 @@
             <DeviceOverview v-for="deviceID in devices" :key="deviceID" :deviceId="deviceID.id" />
         </div>
 
-        <popup v-show="$route.name != 'Devices'">
-            <router-view />
+        <popup v-if="$route.name != 'Devices'">
+            <router-view :user="user" />
         </popup>
     </div>
 </template>
@@ -32,9 +32,12 @@
     import LoadingScreen from "../components/LoadingScreen.vue"
     import BlankDeviceOverview from "@/components/Blanks/BlankDeviceOverview.vue"
     import Popup from "@/components/Popup.vue"
-    import { IDevice } from "server_mgt-lib/types"
+    import { IDevice, IUser } from "server_mgt-lib/types"
 
     @Options({
+        props: {
+            user: Object
+        },
         components: {
             DeviceOverview,
             LoadingScreen,
@@ -43,6 +46,7 @@
         }
     })
     export default class DeviceList extends Vue {
+        user?: IUser
         devices: IDevice[] = []
         loading: boolean = true
         error: boolean = false

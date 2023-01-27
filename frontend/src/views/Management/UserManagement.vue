@@ -39,6 +39,7 @@
 
         async getData() {
             this.users = (await adminRequests.getUsers()) ?? []
+            this.$forceUpdate()
         }
 
         mounted(): void {

@@ -1,6 +1,7 @@
 <template>
     <div id="nav">
-        <router-link to="/">Home</router-link>
+        <router-link to="/">Devices</router-link>
+        <router-link to="/groups">Groups</router-link>
         <router-link to="/login" v-show="!loggedIn">Login</router-link>
         <router-link to="/management" v-show="admin">Management</router-link>
         <a @click="logout" v-show="loggedIn">Logout</a>

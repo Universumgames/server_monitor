@@ -1,6 +1,8 @@
 <template>
     <div>
         <h2>User creation container</h2>
+        <input v-model="username" placeholder="Username" />
+        <input v-model="email" placeholder="E-Mail" />
         <button @click="cancel" class="delete">Cancel</button>
         <button @click="createUser" class="create">Create</button>
     </div>

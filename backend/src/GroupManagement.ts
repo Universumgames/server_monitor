@@ -13,7 +13,10 @@ export default class GroupManagement {
      * @return {Group | undefined} the group or undefined
      */
     static async getGroup(data: { id?: string; name?: string }): Promise<Group | undefined> {
-        return await Group.findOne({ where: { id: data.id, name: data.name } })
+        let whereClause: any = {}
+        if (data.id != undefined) whereClause = { ...whereClause, id: data.id }
+        if (data.name != undefined) whereClause = { ...whereClause, name: data.name }
+        return await Group.findOne({ where: whereClause, relations: ["owner"] })
     }
 
     /**
@@ -21,7 +24,7 @@ export default class GroupManagement {
      * @return {Group[]} all groups
      */
     static async getGroups(): Promise<Group[]> {
-        return await Group.find()
+        return await Group.find({ relations: ["owner"] })
     }
 
     /**
@@ -80,7 +83,7 @@ export default class GroupManagement {
         const group = await GroupManagement.getGroup({ id: data.groupId })
         if (user == undefined || group == undefined) return undefined
         if (user.groups == undefined) user.groups = []
-        user.groups.push(group)
+        if (!user.groups.includes(group)) user.groups.push(group)
         await user.save()
         return await group.save()
     }
@@ -146,7 +149,7 @@ export default class GroupManagement {
     static async getGroupDevices(data: { groupId: string }): Promise<Device[]> {
         const group = await GroupManagement.getGroup({ id: data.groupId })
         if (group == undefined) return []
-        return await Device.find({ where: { groups: group } })
+        return await Device.find({ where: { group: { id: data.groupId } } })
     }
 
     /**
@@ -182,5 +185,29 @@ export default class GroupManagement {
             userId: data.userId
         })
         return devices.some((d) => d.id == data.deviceId)
+    }
+
+    /**
+     * Get all groups accessible by a user
+     * @param {{string}} data user data
+     * @return {Group[]} the groups accessible by the user
+     */
+    static async getGroupsAccessibleByUser(data: { userId: string }): Promise<Group[]> {
+        const user = await UserManagement.getUser({ id: data.userId })
+        if (user == undefined) return []
+        if (user.groups == undefined) return []
+        return user.groups
+    }
+
+    /**
+     * get all users in a group
+     * @param {{string}} data group data
+     * @return {User[]} the users in the group
+     */
+    static async getUsersInGroup(data: { groupId: string }): Promise<User[]> {
+        const group = await GroupManagement.getGroup({ id: data.groupId })
+        if (group == undefined) return []
+        const users = await UserManagement.getUsers()
+        return users.filter((u) => u.groups?.some((g) => g.id == group.id))
     }
 }

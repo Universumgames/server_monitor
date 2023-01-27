@@ -7,6 +7,7 @@ import { getDataFromAny } from "../helper"
 import userRoutes from "./userRouters"
 import { checkAdmin, checkLoggedIn } from "./routehelper"
 import adminRoutes from "./adminRoutes"
+import groupRoutes from "./groupRoutes"
 
 // eslint-disable-next-line new-cap
 const apiRoutes = express.Router()
@@ -75,6 +76,7 @@ const testClearAllSoftware = async (req: Request, res: Response, next: NextFunct
 apiRoutes.all("/serverInfo", serverInfo)
 apiRoutes.use("/device", deviceRoutes)
 apiRoutes.use("/user", userRoutes)
+apiRoutes.use("/group", checkLoggedIn, groupRoutes)
 apiRoutes.post("/registerDevice", testRegisterDevice)
 apiRoutes.post("/registerSoftware", testRegisterSoftware)
 apiRoutes.post("/pushSystemUpdates", testPushSystemUpdates)

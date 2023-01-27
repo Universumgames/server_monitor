@@ -9,10 +9,12 @@ import {
     SystemStatus,
     User
 } from "../entities/entities"
-import { getDataFromAny } from "../helper"
+import { getDataFromAny, userIsAdmin } from "../helper"
 import { checkDeviceToken, checkLoggedIn, checkRegistrationToken } from "./routehelper"
 import DeviceManagement from "../DeviceManagement"
 import * as responses from "server_mgt-lib/responses"
+import * as requests from "server_mgt-lib/requests"
+import GroupManagement from "../GroupManagement"
 
 // eslint-disable-next-line new-cap
 const deviceRoutes = express.Router()
@@ -282,6 +284,42 @@ export const getDetailedDevice = async (req: Request, res: Response, next: NextF
     }
 }
 
+const editDevice = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // @ts-ignore
+        const user = req.user as User
+        const deviceID = getDataFromAny(req, "deviceID")
+        if (deviceID == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
+
+        const device = await DeviceManagement.getDeviceAccessibleByUser({
+            userId: user.id,
+            deviceId: deviceID
+        })
+        if (device == undefined) return res.status(ReturnCode.UNPROCESSABLE_ENTITY).end()
+        if (device.owner.id != user.id && !userIsAdmin(user))
+            return res.status(ReturnCode.UNAUTHORIZED).end()
+
+        const edits = req.body as requests.DeviceEditRequest
+        if (edits.delete) {
+            await DeviceManagement.deleteDevice({ userId: user.id, deviceId: deviceID })
+            return res.status(ReturnCode.OK).end()
+        }
+        if (edits.newGroupId != undefined) {
+            const group = await GroupManagement.moveDeviceToGroup({
+                deviceId: deviceID,
+                groupId: edits.newGroupId
+            })
+            return res
+                .status(group?.id == edits.newGroupId ? ReturnCode.OK : ReturnCode.BAD_REQUEST)
+                .end()
+        }
+        return res.status(ReturnCode.UNPROCESSABLE_ENTITY).end()
+    } catch (e) {
+        console.error(e)
+        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
+    }
+}
+
 // TODO add editing of device
 
 deviceRoutes.post("/registerDevice", checkRegistrationToken, registerDevice)
@@ -293,6 +331,7 @@ deviceRoutes.get("/:deviceID/state", checkLoggedIn, getDeviceStatus)
 deviceRoutes.get("/:deviceID/basic", checkLoggedIn, getBasicDevice)
 deviceRoutes.get("/:deviceID/software", checkLoggedIn, getSoftwareUpdates)
 deviceRoutes.get("/:deviceID/details", checkLoggedIn, getDetailedDevice)
+deviceRoutes.post("/:deviceID/edit", checkLoggedIn, editDevice)
 deviceRoutes.post("/createDeviceRegistrationToken", checkLoggedIn, createDeviceRegistrationToken)
 deviceRoutes.get("/checkDeviceRegistrationToken", checkLoggedIn, checkDeviceRegistrationToken)
 

@@ -1,4 +1,4 @@
-import { User, Device, DeviceRegistrationToken } from "./entities/entities"
+import { Device, DeviceRegistrationToken } from "./entities/entities"
 import { DeviceState } from "server_mgt-lib/types"
 import UserManagement from "./UserManagement"
 import { userIsAdmin } from "./helper"
@@ -84,6 +84,24 @@ export default class DeviceManagement {
         device.group = user!.userGroup
 
         return await device.save()
+    }
+
+    /**
+     * Get all devices accessible by a user.
+     * @param {{string}} data user data to find devices
+     * @param {string[]} additionalRelations additional relations to load
+     * @return {Device} the devices
+     */
+    static async getDeviceAccessibleByUser(
+        data: { userId: string; deviceId: string; considerAdmin?: boolean },
+        additionalRelations: string[] = []
+    ): Promise<Device | undefined> {
+        const user = await UserManagement.getUser({ id: data.userId }, ["groups"])
+        if (user == undefined) return undefined
+        const device = await this.getDevice({ id: data.deviceId }, additionalRelations)
+        if (userIsAdmin(user) && data.considerAdmin) return device
+        if (!this.isAccessibleByUser({ userId: user.id, deviceId: data.deviceId })) return undefined
+        return device
     }
 
     /**
@@ -192,5 +210,26 @@ export default class DeviceManagement {
             if (group.id == device.group.id) return true
         }
         return false
+    }
+
+    /**
+     * Delete a device.
+     * @param {{string}} data device data to delete device
+     * @return {boolean} true if device was deleted, false otherwise
+     */
+    static async deleteDevice(data: {
+        userId: string
+        deviceId: string
+        considerAdmin?: boolean
+    }): Promise<boolean> {
+        const device = data.considerAdmin
+            ? await DeviceManagement.getDevice({ id: data.deviceId })
+            : await DeviceManagement.getDeviceAccessibleByUser({
+                  userId: data.userId,
+                  deviceId: data.deviceId
+              })
+        if (device == undefined) return false
+        await device.remove()
+        return true
     }
 }

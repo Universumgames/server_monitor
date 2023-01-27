@@ -14,7 +14,7 @@
             </div>
 
             <div class="userRowDelete">
-                <button class="delete">Delete</button>
+                <button class="delete" @click="deleteUser()">Delete</button>
             </div>
         </div>
     </div>
@@ -40,6 +40,17 @@
         async mounted() {
             this.detailedUser = await adminRequests.getUser(this.user?.id ?? "")
             console.log(this.detailedUser)
+        }
+
+        async deleteUser() {
+            if (!confirm("Are you sure you want to delete this user?")) return
+            const response = await adminRequests.editUser({
+                userId: this.user?.id ?? "",
+                delete: true
+            })
+            if (response != undefined) {
+                this.$emit("deleteUser", this.user)
+            }
         }
     }
 </script>

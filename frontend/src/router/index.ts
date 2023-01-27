@@ -72,6 +72,24 @@ const routes = [
                 meta: {
                     title: "Register new Device"
                 }
+            },
+            {
+                path: "/groups",
+                name: "Groups",
+                component: () => import("../views/GroupList.vue"),
+                meta: {
+                    title: "Groups"
+                },
+                children: [
+                    {
+                        path: "/groups/:id",
+                        name: "GroupDetails",
+                        component: () => import("../views/GroupEdit.vue"),
+                        meta: {
+                            title: "Group Details"
+                        }
+                    }
+                ]
             }
         ]
     },

@@ -47,7 +47,7 @@ export function getDeviceToken(req: Request): string | undefined {
  * @param {string} dataKey the key of the data to get
  * @return {string} the data from any source
  */
-export function getDataFromAny(req: Request, dataKey: string): string | undefined {
+export function getDataFromAny(req: Request, dataKey: string): string | boolean | any | undefined {
     if (req.cookies != undefined) {
         const cookie = req.cookies[cookieName]
         if (cookie != undefined) {
