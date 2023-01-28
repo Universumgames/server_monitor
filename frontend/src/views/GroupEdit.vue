@@ -6,7 +6,9 @@
         <div class="smallGroupEntryContainer">
             <div v-for="user of group?.users" :key="user.id" class="slimHighlightContainer">
                 {{ user.username }}
-                <button :class="'delete' + (isButtonDisabled(user) ? ' btn-disabled' : '')">
+                <button
+                    :class="'delete' + (isButtonDisabled(user) ? ' btn-disabled' : '')"
+                    @click="removeUser(user)">
                     x
                 </button>
             </div>
@@ -83,6 +85,12 @@
             }
 
             this.$forceUpdate()
+        }
+
+        async removeUser(user: IUser) {
+            if (this.isButtonDisabled(user)) return
+            await requests.removeUserFromGroup(this.groupId, user.id)
+            await this.getData()
         }
         // TODO implement group edit
     }

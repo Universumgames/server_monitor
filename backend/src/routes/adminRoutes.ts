@@ -31,10 +31,20 @@ const userOperations = async (req: Request, res: Response, next: NextFunction) =
             if (username == undefined || email == undefined)
                 return res.status(ReturnCode.MISSING_PARAMS).end()
 
-            console.log("Creating user: " + username + " " + email)
-
             const newUser = await UserManagement.createUser({ username: username, email: email })
-            return res.status(ReturnCode.OK).json(newUser)
+            const body = JSON.stringify(newUser, () => {
+                const seen = new WeakSet()
+                return (key: any, value: any) => {
+                    if (typeof value === "object" && value !== null) {
+                        if (seen.has(value)) {
+                            return
+                        }
+                        seen.add(value)
+                    }
+                    return value
+                }
+            })
+            return res.status(ReturnCode.OK).type("application/json").send(body)
         }
         // edit user
         if (edit.delete != undefined && edit.delete) {

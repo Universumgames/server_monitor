@@ -34,7 +34,9 @@ const userGroup = async (req: Request, res: Response, next: NextFunction) => {
         // @ts-ignore
         const user = req.user as User
 
-        return res.status(ReturnCode.OK).json(user.userGroup)
+        const userGroup = await GroupManagement.getUserGroup({ userId: user.id })
+
+        return res.status(ReturnCode.OK).json(userGroup)
     } catch (error) {
         console.error(error)
         return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
