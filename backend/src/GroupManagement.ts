@@ -12,12 +12,12 @@ export default class GroupManagement {
      * get group by id
      * @param {{string, string}} data group data to find group
      * @param {string[]} additionalRelations additional relations to load
-     * @return {Group | undefined} the group or undefined
+     * @return {Group | null} the group or undefined
      */
     static async getGroup(
         data: { id?: string; name?: string },
         additionalRelations: string[] = []
-    ): Promise<Group | undefined> {
+    ): Promise<Group | null> {
         let whereClause: any = {}
         if (data.id != undefined) whereClause = { ...whereClause, id: data.id }
         if (data.name != undefined) whereClause = { ...whereClause, name: data.name }
@@ -58,9 +58,9 @@ export default class GroupManagement {
      * @param {{string}} data user data
      * @return {Group} the main group the user is in
      */
-    static async getUserGroup(data: { userId: string }): Promise<Group | undefined> {
+    static async getUserGroup(data: { userId: string }): Promise<Group | null> {
         const user = await UserManagement.getUser({ id: data.userId }, ["userGroup"])
-        if (user == undefined) return undefined
+        if (user == null) return null
         return user.userGroup!
     }
 
@@ -81,15 +81,12 @@ export default class GroupManagement {
     /**
      * Add user to group
      * @param {{string, string}} data user and group data
-     * @return {Group | undefined} the group the user was added to or undefined
+     * @return {Group | null} the group the user was added to or undefined
      */
-    static async addUserToGroup(data: {
-        userId: string
-        groupId: string
-    }): Promise<Group | undefined> {
+    static async addUserToGroup(data: { userId: string; groupId: string }): Promise<Group | null> {
         const user = await UserManagement.getUser({ id: data.userId })
         const group = await GroupManagement.getGroup({ id: data.groupId })
-        if (user == undefined || group == undefined) return undefined
+        if (user == null || group == null) return null
         if (user.groups == undefined) user.groups = []
         if (!user.groups.includes(group)) user.groups.push(group)
         await user.save()
@@ -99,17 +96,17 @@ export default class GroupManagement {
     /**
      * Remove user from group
      * @param {{string, string}} data  user and group data
-     * @return {Group | undefined} the group the user was removed from or undefined
+     * @return {Group | null} the group the user was removed from or undefined
      */
     static async removeUserFromGroup(data: {
         userId: string
         groupId: string
-    }): Promise<Group | undefined> {
+    }): Promise<Group | null> {
         const user = await UserManagement.getUser({ id: data.userId })
         const group = await GroupManagement.getGroup({ id: data.groupId })
-        if (user == undefined || group == undefined) return undefined
-        if (group.owner == user) return undefined
-        if (user.groups == undefined) user.groups = []
+        if (user == null || group == null) return null
+        if (group.owner == user) return null
+        if (user.groups == null) user.groups = []
         user.groups = user.groups.filter((g) => g.id != group.id)
         await user.save()
         return await group.save()
@@ -118,15 +115,15 @@ export default class GroupManagement {
     /**
      * Add device to group
      * @param {{string, string}} data device and group data
-     * @return {Group | undefined} the group the device was added to or undefined
+     * @return {Group | null} the group the device was added to or undefined
      */
     static async addDeviceToGroup(data: {
         deviceId: string
         groupId: string
-    }): Promise<Group | undefined> {
+    }): Promise<Group | null> {
         const device = await DeviceManagement.getDevice({ id: data.deviceId })
         const group = await GroupManagement.getGroup({ id: data.groupId })
-        if (device == undefined || group == undefined) return undefined
+        if (device == null || group == null) return null
         device.group = group
         await device.save()
         return await group.save()
@@ -135,17 +132,17 @@ export default class GroupManagement {
     /**
      * Remove device from group
      * @param {{string, string}} data device and group data
-     * @return {Group | undefined} the group the device was removed from or undefined
+     * @return {Group | null} the group the device was removed from or undefined
      */
     static async moveDeviceToGroup(data: {
         deviceId: string
         groupId: string
-    }): Promise<Group | undefined> {
+    }): Promise<Group | null> {
         const device = await DeviceManagement.getDevice({ id: data.deviceId }, ["owner"])
         let group = await GroupManagement.getGroup({ id: data.groupId })
-        if (device == undefined) return undefined
-        if (group == undefined) group = await this.getUserGroup({ userId: device.owner.id })
-        if (group == undefined) throw new Error(`Usergroup of user ${device.owner.id} not found`)
+        if (device == null) return null
+        if (group == null) group = await this.getUserGroup({ userId: device.owner.id })
+        if (group == null) throw new Error(`Usergroup of user ${device.owner.id} not found`)
         device.group = group
         await device.save()
         return await group.save()
@@ -207,10 +204,14 @@ export default class GroupManagement {
     /**
      * Get all groups accessible by a user
      * @param {{string}} data user data
+     * @param {string[]} additionalRelations additional relations to load
      * @return {Group[]} the groups accessible by the user
      */
-    static async getGroupsAccessibleByUser(data: { userId: string }): Promise<Group[]> {
-        const user = await UserManagement.getUser({ id: data.userId })
+    static async getGroupsAccessibleByUser(
+        data: { userId: string },
+        additionalRelations: string[] = []
+    ): Promise<Group[]> {
+        const user = await UserManagement.getUser({ id: data.userId }, additionalRelations)
         if (user == undefined) return []
         if (user.groups == undefined) return []
         return user.groups
@@ -237,7 +238,8 @@ export default class GroupManagement {
         const group = await GroupManagement.getGroup({ id: data.groupId })
         if (group == undefined) return 0
         const [users, count] = await User.getRepository().findAndCount({
-            where: { groups: ArrayContains(group.id) }
+            // eslint-disable-next-line new-cap
+            where: { groups: ArrayContains([data.groupId]) }
         })
         return count
     }

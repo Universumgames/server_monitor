@@ -130,9 +130,11 @@ const pushSystemStatus = async (req: Request, res: Response, next: NextFunction)
 
         // @ts-ignore
         const device1 = req.device
-        const device = await Device.findOne(device1.id, {
+        const device = await Device.findOne({
+            where: { id: device1.id },
             relations: ["status", "status.ipAddresses"]
         })
+        if (device == undefined) return res.status(ReturnCode.BAD_REQUEST).end()
 
         const statusParsed = JSON.parse(status) as ISystemStatus
         if (device.status != undefined) {
@@ -222,7 +224,7 @@ export const getBasicDevice = async (req: Request, res: Response, next: NextFunc
         // @ts-ignore
         const deviceID = getDataFromAny(req, "deviceID")
         if (deviceID == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
-        const device = await Device.findOne(deviceID)
+        const device = await DeviceManagement.getDevice(deviceID)
         if (device == undefined) return res.status(ReturnCode.BAD_REQUEST).end()
 
         const deviceSend: any = Object.assign({}, device)
@@ -246,7 +248,7 @@ export const getSoftwareUpdates = async (req: Request, res: Response, next: Next
         // @ts-ignore
         const deviceID = getDataFromAny(req, "deviceID")
         if (deviceID == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
-        const software = await DeviceSoftware.find({ where: { device: deviceID } })
+        const software = await DeviceSoftware.find({ where: { device: { id: deviceID } } })
         if (software == undefined) return res.status(ReturnCode.BAD_REQUEST).end()
 
         return res.status(ReturnCode.OK).json(software)

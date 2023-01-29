@@ -28,7 +28,7 @@ export function addSessionCookie(res: Response, session: UserSession): Response 
  * @param {express.Request} req the express request process
  * @return {Cookie} the cookie
  */
-export function getSessionToken(req: Request): string | undefined {
+export function getSessionToken(req: Request): string | null {
     return getDataFromAny(req, "sessionToken")
 }
 
@@ -37,7 +37,7 @@ export function getSessionToken(req: Request): string | undefined {
  * @param {express.Request} req the express request process
  * @return {string} the deviceToken
  */
-export function getDeviceToken(req: Request): string | undefined {
+export function getDeviceToken(req: Request): string | null {
     return getDataFromAny(req, "deviceToken")
 }
 

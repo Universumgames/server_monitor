@@ -26,7 +26,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         if (token != undefined) {
             const user = await UserManagement.getUser({ sessionToken: token })
             if (user == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
-            const session = await UserSession.findOne({ token: token })
+            const session = await UserSession.findOne({ where: { token: token } })
             if (session == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
             return addSessionCookie(res.status(ReturnCode.OK), session).end()
         } else {
@@ -59,9 +59,9 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // @ts-ignore
         const user = req.user as User
-        if (user == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
+        if (user == null) return res.status(ReturnCode.UNAUTHORIZED).end()
 
-        const session = await UserSession.findOne({ user: user })
+        const session = await UserSession.findOne({ where: { user: { id: user.id } } })
         if (session == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
         await session.remove()
         return res.status(ReturnCode.OK).clearCookie(cookieName).end()

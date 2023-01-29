@@ -14,7 +14,7 @@ export const config = {
     serverVersion: nodeconfig.get<string>("serverVersion"),
     superAdmin: {
         mail: nodeconfig.get<string>("superAdmin.mail"),
-        username: nodeconfig.get<string | undefined>("superAdmin.username")
+        username: nodeconfig.get<string | null>("superAdmin.username")
     },
     mailServer: {
         host: nodeconfig.get<string>("mailServer.host"),

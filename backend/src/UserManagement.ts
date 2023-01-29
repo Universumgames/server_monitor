@@ -13,12 +13,12 @@ export default class UserManagement {
      * get user by id
      * @param {{string, string}} data user data to find user
      * @param {string[]} additionalRelations additional relations to load
-     * @return {User | undefined} the user or undefined
+     * @return {User | null} the user or undefined
      */
     static async getUser(
         data: { id?: string; username?: string; mail?: string; sessionToken?: string },
         additionalRelations: string[] = []
-    ): Promise<User | undefined> {
+    ): Promise<User | null> {
         let userId = data.id
         if (data.sessionToken != undefined) {
             const session = await UserSession.findOne({
@@ -77,11 +77,11 @@ export default class UserManagement {
     /**
      * Get all devices owned by a user
      * @param {{string}} data user data to find user
-     * @return {Device[] | undefined} the devices or undefined
+     * @return {Device[] | null} the devices or undefined
      */
-    static async getOwnDevices(data: { id: string }): Promise<Device[] | undefined> {
+    static async getOwnDevices(data: { id: string }): Promise<Device[] | null> {
         const user = await UserManagement.getUser({ id: data.id }, ["owns"])
-        if (user == undefined) return undefined
+        if (user == null) return null
         return user.owns
     }
 
@@ -90,10 +90,10 @@ export default class UserManagement {
      * @param {{string}} data user data to find user
      * @return {UserSession} the created session
      */
-    static async createSession(data: { userId: string }): Promise<UserSession | undefined> {
+    static async createSession(data: { userId: string }): Promise<UserSession | null> {
         const session = new UserSession()
         const user = await UserManagement.getUser({ id: data.userId })
-        if (user == undefined) return undefined
+        if (user == null) return null
         session.user = user
         // set expiration to 3 months
         session.expires = new Date()

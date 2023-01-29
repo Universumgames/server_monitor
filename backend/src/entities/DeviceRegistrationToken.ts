@@ -28,5 +28,5 @@ export class DeviceRegistrationToken extends BaseEntity {
 
     @OneToOne((type) => Device, { nullable: true })
     @JoinColumn()
-    device: Device | undefined
+    device: Device | null
 }

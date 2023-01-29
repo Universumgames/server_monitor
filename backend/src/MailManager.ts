@@ -61,7 +61,7 @@ class MailManager {
     }
 }
 
-let mailManager: MailManager | undefined
+let mailManager: MailManager | null
 
 /**
  * creates if not already present a new UserManager, if existent returns existing one

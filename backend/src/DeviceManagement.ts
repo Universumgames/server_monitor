@@ -11,12 +11,12 @@ export default class DeviceManagement {
      * Get a device by id.
      * @param {{string, string}} data device data to find device
      * @param {string[]} additionalRelations additional relations to load
-     * @return {Device | undefined} the device or undefined
+     * @return {Device | null} the device or undefined
      */
     static async getDevice(
         data: { id?: string; auth_key?: string },
         additionalRelations: string[] = []
-    ): Promise<Device | undefined> {
+    ): Promise<Device | null> {
         let whereClause: any = {}
         if (data.id != undefined) whereClause = { ...whereClause, id: data.id }
         if (data.auth_key != undefined) whereClause = { ...whereClause, auth_key: data.auth_key }
@@ -95,12 +95,12 @@ export default class DeviceManagement {
     static async getDeviceAccessibleByUser(
         data: { userId: string; deviceId: string; considerAdmin?: boolean },
         additionalRelations: string[] = []
-    ): Promise<Device | undefined> {
+    ): Promise<Device | null> {
         const user = await UserManagement.getUser({ id: data.userId }, ["groups"])
-        if (user == undefined) return undefined
+        if (user == undefined) return null
         const device = await this.getDevice({ id: data.deviceId }, additionalRelations)
         if (userIsAdmin(user) && data.considerAdmin) return device
-        if (!this.isAccessibleByUser({ userId: user.id, deviceId: data.deviceId })) return undefined
+        if (!this.isAccessibleByUser({ userId: user.id, deviceId: data.deviceId })) return null
         return device
     }
 
@@ -140,19 +140,19 @@ export default class DeviceManagement {
     /**
      * Create a new device registration token.
      * @param {{string}} data user data to create device registration token
-     * @return {DeviceRegistrationToken | undefined} the created device registration token or undefined
+     * @return {DeviceRegistrationToken | null} the created device registration token or undefined
      */
     static async createDeviceRegistrationToken(data: {
         userId: string
-    }): Promise<DeviceRegistrationToken | undefined> {
+    }): Promise<DeviceRegistrationToken | null> {
         const user = await UserManagement.getUser({ id: data.userId })
-        if (user == undefined) return undefined
+        if (user == null) return null
         const registrationToken = new DeviceRegistrationToken()
         registrationToken.user = user
         const expiration = new Date()
         expiration.setHours(expiration.getHours() + 1)
         registrationToken.expires = expiration
-        registrationToken.device = undefined
+        registrationToken.device = null
         return await registrationToken.save()
     }
 

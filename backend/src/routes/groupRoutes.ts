@@ -21,7 +21,9 @@ const getGroups = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // @ts-ignore
         const user = req.user as User
-        const groups = await GroupManagement.getGroupsAccessibleByUser({ userId: user.id })
+        const groups = await GroupManagement.getGroupsAccessibleByUser({ userId: user.id }, [
+            "groups.owner"
+        ])
         const detailedGroups: responses.BasicGroupResponse[] = await Promise.all(
             groups.map(async (group) => {
                 const users = await GroupManagement.getUsersInGroup({ groupId: group.id })
