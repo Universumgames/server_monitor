@@ -191,7 +191,7 @@ export async function editDevice(
     }
 }
 
-export async function getAvailableGroups(): Promise<types.IGroup[] | undefined> {
+export async function getAvailableGroups(): Promise<responses.BasicGroupListResponse | undefined> {
     try {
         const response = await fetch("/api/group/list")
         return await response.json()

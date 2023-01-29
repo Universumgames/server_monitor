@@ -24,6 +24,7 @@
     import { IGroup, IUser } from "server_mgt-lib/types"
     import { Options, Vue } from "vue-class-component"
     import * as requests from "@/helper/requests"
+    import * as responses from "server_mgt-lib/responses"
     import Popup from "@/components/Popup.vue"
 
     @Options({
@@ -37,7 +38,7 @@
     export default class Grouplist extends Vue {
         user?: IUser = undefined
 
-        groups: IGroup[] = []
+        groups: responses.BasicGroupResponse[] = []
         userGroup: IGroup | undefined = undefined
 
         async created() {
@@ -47,15 +48,18 @@
         async getData() {
             this.userGroup = await requests.getUserGroup()
 
-            this.groups = (await requests.getAvailableGroups()) ?? []
+            this.groups = (await requests.getAvailableGroups())?.groups ?? []
             this.$forceUpdate()
         }
 
-        isEditable(group: IGroup): boolean {
-            return group.id != this.userGroup?.id
+        isEditable(group: responses.BasicGroupResponse): boolean {
+            return (
+                group.id != this.userGroup?.id &&
+                ((this.user?.admin ?? false) || group.ownerId == this.user?.id)
+            )
         }
 
-        async deleteGroup(group: IGroup) {
+        async deleteGroup(group: responses.BasicGroupResponse) {
             if (this.isEditable(group) && confirm("Do you really want to delete this group?")) {
                 const response = await requests.deleteGroup(group.id)
                 if (!response) alert("Could not delete group, maybe you are not the owner?")
@@ -63,7 +67,7 @@
             }
         }
 
-        editGroup(group: IGroup) {
+        editGroup(group: responses.BasicGroupResponse) {
             if (this.isEditable(group)) {
                 this.$router.push({ name: "GroupDetails", params: { id: group.id } })
             }

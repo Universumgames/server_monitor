@@ -11,6 +11,7 @@
     import { IDevice, IGroup } from "server_mgt-lib/types"
     import { Options, Vue } from "vue-class-component"
     import * as requests from "@/helper/requests"
+    import * as responses from "server_mgt-lib/responses"
 
     @Options({
         props: {
@@ -20,15 +21,15 @@
     })
     export default class GroupChange extends Vue {
         device?: IDevice = undefined
-        groups: IGroup[] = []
-        allGroups: IGroup[] = []
+        groups: responses.BasicGroupResponse[] = []
+        allGroups: responses.BasicGroupResponse[] = []
         enabled = false
 
         selectedGroupId: string = ""
         selectedGroup: IGroup | undefined = undefined
 
         async mounted() {
-            this.allGroups = (await requests.getAvailableGroups()) ?? []
+            this.allGroups = (await requests.getAvailableGroups())?.groups ?? []
             this.groups = this.allGroups.filter((group) => group.id != this.device?.group.id)
             this.selectedGroupId = this.device?.group.id ?? ""
             this.selectedGroup = this.device?.group
