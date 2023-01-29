@@ -54,14 +54,12 @@
         }
 
         async createUser(user: IUser) {
-            const response = await adminRequests.createUser({
+            await adminRequests.createUser({
                 username: user.username,
                 email: user.email
             })
-            if (response != undefined) {
-                this.creatingUser = false
-                await this.getData()
-            }
+            this.creatingUser = false
+            await this.getData()
         }
     }
 </script>

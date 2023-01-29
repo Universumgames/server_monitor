@@ -67,7 +67,7 @@
             </div>
             <div class="deleteContainer">
                 <button
-                    :class="device?.owner.id == user?.id ? 'delete' : 'disabled'"
+                    :class="device?.owner.id == user?.id ? 'delete' : 'btn-disabled'"
                     @click="deleteDevice()">
                     Delete device
                 </button>
@@ -192,6 +192,8 @@
         }
 
         async deleteDevice() {
+            if (this.device?.owner.id != this.user?.id)
+                return alert("You are not the owner of this device")
             if (confirm("Are you sure you want to delete this device?")) {
                 await requests.editDevice(this.device?.id ?? "", {
                     deviceId: this.device?.id ?? "",

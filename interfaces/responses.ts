@@ -9,6 +9,16 @@ export interface CheckDeviceRegistrationResponse extends CreateDeviceRegistratio
     deviceId: string
 }
 
+export interface BasicGroupResponse {
+    id: string
+    name: string
+    memberCount: number
+    ownerId: string
+}
+export interface BasicGroupListResponse {
+    groups: BasicGroupResponse[]
+}
+
 export interface DetailedGroupResponse {
     owner: IUser
     group: IGroup

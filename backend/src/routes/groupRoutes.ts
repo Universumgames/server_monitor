@@ -22,7 +22,21 @@ const getGroups = async (req: Request, res: Response, next: NextFunction) => {
         // @ts-ignore
         const user = req.user as User
         const groups = await GroupManagement.getGroupsAccessibleByUser({ userId: user.id })
-        return res.status(ReturnCode.OK).json(groups)
+        const detailedGroups: responses.BasicGroupResponse[] = await Promise.all(
+            groups.map(async (group) => {
+                const users = await GroupManagement.getUsersInGroup({ groupId: group.id })
+                return {
+                    id: group.id,
+                    name: group.name,
+                    memberCount: users.length,
+                    ownerId: group.owner.id
+                }
+            })
+        )
+        const body: responses.BasicGroupListResponse = {
+            groups: detailedGroups
+        }
+        return res.status(ReturnCode.OK).json(body)
     } catch (error) {
         console.error(error)
         return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
@@ -80,7 +94,9 @@ const editUserList = async (req: Request, res: Response, next: NextFunction) => 
                 await GroupManagement.removeUserFromGroup({ userId: userId, groupId: group.id })
             }
         }
-        // TODO delete group
+        if (edits.delete != undefined && edits.delete) {
+            await GroupManagement.deleteGroup({ groupId: group.id })
+        }
 
         return res.status(ReturnCode.OK).end()
     } catch (error) {

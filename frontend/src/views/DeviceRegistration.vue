@@ -36,9 +36,8 @@
                 this.newDeviceToken = await requests.createDeviceRegistrationToken()
                 this.existingDeviceToken = this.newDeviceToken?.token ?? ""
                 this.$router.replace({ params: { token: this.existingDeviceToken } })
-            } else {
-                await this.checkToken()
             }
+            await this.checkToken()
         }
 
         async checkToken() {

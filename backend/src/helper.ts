@@ -80,3 +80,12 @@ export function userIsAdmin(user: User): boolean {
 export function userIsSuperAdmin(user: User): boolean {
     return config.superAdmin.mail.toLowerCase() == user.email.toLowerCase()
 }
+
+/**
+ * get unique values from array
+ * @param {T[]} arr the array to get unique values from
+ * @return {T[]} the unique values
+ */
+export function unique<T>(arr: T[]): T[] {
+    return [...new Set(arr)]
+}

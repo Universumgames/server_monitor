@@ -3,7 +3,7 @@ import { Device, Group, User, UserSession } from "./entities/entities"
 import getMailManager from "./MailManager"
 import { Request } from "express"
 import GroupManagement from "./GroupManagement"
-import Database from "./database"
+import { unique } from "./helper"
 
 /**
  * User management class
@@ -39,7 +39,7 @@ export default class UserManagement {
 
         return await User.findOne({
             where: { ...whereClause },
-            relations: Array.from(new Set([...["groups", "userGroup"], ...additionalRelations]))
+            relations: unique([...["groups", "userGroup"], ...additionalRelations])
         })
     }
 
@@ -50,7 +50,7 @@ export default class UserManagement {
      */
     static async getUsers(additionalRelations: string[] = []): Promise<User[]> {
         return await User.find({
-            relations: Array.from(new Set([...["groups", "userGroup"], ...additionalRelations]))
+            relations: unique([...["groups", "userGroup"], ...additionalRelations])
         })
     }
 

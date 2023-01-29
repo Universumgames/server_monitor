@@ -5,6 +5,7 @@ import { config } from "./monitor_config"
 import Database from "./database"
 import { createMailManager } from "./MailManager"
 import UserManagement from "./UserManagement"
+import "reflect-metadata"
 
 const db = new Database()
 db.init()

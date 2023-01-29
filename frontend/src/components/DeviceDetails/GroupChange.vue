@@ -1,5 +1,5 @@
 <template>
-    <select v-model="selectedGroupId" :disabled="!enabled">
+    <select v-model="selectedGroupId" :disabled="!enabled" @change="onChange">
         <option :value="device?.group.id">{{ device?.group.name }}</option>
         <option v-for="group in groups" :value="group.id" :key="group.id">
             {{ group.name }}
@@ -27,13 +27,18 @@
         selectedGroupId: string = ""
         selectedGroup: IGroup | undefined = undefined
 
-        async created() {
+        async mounted() {
             this.allGroups = (await requests.getAvailableGroups()) ?? []
             this.groups = this.allGroups.filter((group) => group.id != this.device?.group.id)
             this.selectedGroupId = this.device?.group.id ?? ""
             this.selectedGroup = this.device?.group
         }
 
-        // TODO implement group change
+        async onChange() {
+            await requests.editDevice(this.device?.id ?? "", {
+                deviceId: this.device?.id ?? "",
+                newGroupId: this.selectedGroupId
+            })
+        }
     }
 </script>

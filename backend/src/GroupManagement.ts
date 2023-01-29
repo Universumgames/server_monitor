@@ -1,7 +1,8 @@
 import DeviceManagement from "./DeviceManagement"
 import { Device, Group, User } from "./entities/entities"
 import UserManagement from "./UserManagement"
-import { userIsAdmin } from "./helper"
+import { unique, userIsAdmin } from "./helper"
+import { ArrayContains } from "typeorm"
 
 /**
  * Group management class
@@ -10,13 +11,20 @@ export default class GroupManagement {
     /**
      * get group by id
      * @param {{string, string}} data group data to find group
+     * @param {string[]} additionalRelations additional relations to load
      * @return {Group | undefined} the group or undefined
      */
-    static async getGroup(data: { id?: string; name?: string }): Promise<Group | undefined> {
+    static async getGroup(
+        data: { id?: string; name?: string },
+        additionalRelations: string[] = []
+    ): Promise<Group | undefined> {
         let whereClause: any = {}
         if (data.id != undefined) whereClause = { ...whereClause, id: data.id }
         if (data.name != undefined) whereClause = { ...whereClause, name: data.name }
-        return await Group.findOne({ where: whereClause, relations: ["owner"] })
+        return await Group.findOne({
+            where: whereClause,
+            relations: unique([...["owner"], ...additionalRelations])
+        })
     }
 
     /**
@@ -133,9 +141,11 @@ export default class GroupManagement {
         deviceId: string
         groupId: string
     }): Promise<Group | undefined> {
-        const device = await DeviceManagement.getDevice({ id: data.deviceId })
-        const group = await GroupManagement.getGroup({ id: data.groupId })
-        if (device == undefined || group == undefined) return undefined
+        const device = await DeviceManagement.getDevice({ id: data.deviceId }, ["owner"])
+        let group = await GroupManagement.getGroup({ id: data.groupId })
+        if (device == undefined) return undefined
+        if (group == undefined) group = await this.getUserGroup({ userId: device.owner.id })
+        if (group == undefined) throw new Error(`Usergroup of user ${device.owner.id} not found`)
         device.group = group
         await device.save()
         return await group.save()
@@ -144,12 +154,19 @@ export default class GroupManagement {
     /**
      * Get all devices in a group
      * @param {{string}} data group data
+     * @param {string[]} additionalRelations additional relations to load
      * @return {Device[]} the devices in the group
      */
-    static async getGroupDevices(data: { groupId: string }): Promise<Device[]> {
+    static async getGroupDevices(
+        data: { groupId: string },
+        additionalRelations: string[] = []
+    ): Promise<Device[]> {
         const group = await GroupManagement.getGroup({ id: data.groupId })
         if (group == undefined) return []
-        return await Device.find({ where: { group: { id: data.groupId } } })
+        return await Device.find({
+            where: { group: { id: data.groupId } },
+            relations: unique(additionalRelations)
+        })
     }
 
     /**
@@ -209,5 +226,46 @@ export default class GroupManagement {
         if (group == undefined) return []
         const users = await UserManagement.getUsers()
         return users.filter((u) => u.groups?.some((g) => g.id == group.id))
+    }
+
+    /**
+     * get the number of users in a group
+     * @param {{string}} data group data
+     * @return {number} the number of users in the group
+     */
+    static async getUserCountInGroup(data: { groupId: string }): Promise<number> {
+        const group = await GroupManagement.getGroup({ id: data.groupId })
+        if (group == undefined) return 0
+        const [users, count] = await User.getRepository().findAndCount({
+            where: { groups: ArrayContains(group.id) }
+        })
+        return count
+    }
+
+    /**
+     * delete a group
+     * @param {{string}} data group data
+     * @return {boolean} true if the group was deleted, false otherwise
+     */
+    static async deleteGroup(data: { groupId: string }): Promise<boolean> {
+        const group = await GroupManagement.getGroup({ id: data.groupId }, [
+            "owner",
+            "owner.userGroups"
+        ])
+        if (group == undefined) return false
+        if (group.owner.userGroup?.id == data.groupId) return false
+        const devices = await GroupManagement.getGroupDevices({ groupId: data.groupId }, [
+            "group",
+            "owner",
+            "owner.userGroup"
+        ])
+        for (const device of devices) {
+            await GroupManagement.moveDeviceToGroup({
+                deviceId: device.id,
+                groupId: group.owner.userGroup?.id ?? ""
+            })
+        }
+        await Group.delete(data.groupId)
+        return true
     }
 }

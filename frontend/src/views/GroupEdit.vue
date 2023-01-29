@@ -2,7 +2,7 @@
     <div>
         <h1>Edit Group {{ group?.group.name }}</h1>
 
-        <h2>Users in this group</h2>
+        <h2>Users in this group ({{ group?.users.length }})</h2>
         <div class="smallGroupEntryContainer">
             <div v-for="user of group?.users" :key="user.id" class="slimHighlightContainer">
                 {{ user.username }}
@@ -24,13 +24,13 @@
             </div>
         </div>
 
-        <h2>Devices in this group</h2>
+        <h2>Devices in this group ({{ group?.devices.length }})</h2>
         <div class="smallGroupEntryContainer">
             <div v-for="device of group?.devices" :key="device.id" class="slimHighlightContainer">
                 {{ device.name }}
                 <button class="delete btn-disabled">x</button>
             </div>
-            <button>+</button>
+            <button class="btn-disabled">+</button>
         </div>
     </div>
 </template>
@@ -63,7 +63,6 @@
         }
 
         async getData() {
-            // TODO implement getting data
             this.group = await requests.getGroupDetails(this.groupId)
             this.$forceUpdate()
         }
@@ -92,7 +91,6 @@
             await requests.removeUserFromGroup(this.groupId, user.id)
             await this.getData()
         }
-        // TODO implement group edit
     }
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-    <h1>Groups</h1>
+    <h1>Groups <button @click="createGroup">+</button></h1>
     <div>
         <div v-for="group of groups" :key="group.id" class="highlightContainer groupRow">
             <label>{{ group.name }}</label>
@@ -57,15 +57,23 @@
 
         async deleteGroup(group: IGroup) {
             if (this.isEditable(group) && confirm("Do you really want to delete this group?")) {
-                // TODO implement group deletion
+                const response = await requests.deleteGroup(group.id)
+                if (!response) alert("Could not delete group, maybe you are not the owner?")
                 await this.getData()
             }
         }
 
         editGroup(group: IGroup) {
-            if (this.isEditable(group) || true == true) {
+            if (this.isEditable(group)) {
                 this.$router.push({ name: "GroupDetails", params: { id: group.id } })
             }
+        }
+
+        async createGroup() {
+            const name = prompt("Please enter a name for the new group")
+            if (name == null) return
+            await requests.createGroup(name)
+            await this.getData()
         }
     }
 </script>
@@ -76,6 +84,7 @@
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: space-between;
+        margin-bottom: 1ch;
     }
 
     .groupRow > label {

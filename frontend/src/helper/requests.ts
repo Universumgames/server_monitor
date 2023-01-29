@@ -262,3 +262,39 @@ export async function removeUserFromGroup(groupId: string, userMail: string): Pr
         return false
     }
 }
+
+export async function createGroup(groupName: string): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/group/create`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ name: groupName })
+        })
+        return response.ok
+    } catch (e) {
+        console.error(e)
+        return false
+    }
+}
+
+export async function deleteGroup(groupId: string): Promise<boolean> {
+    try {
+        const body: requests.GroupEditRequest = {
+            groupId,
+            delete: true
+        }
+        const response = await fetch(`/api/group/edit`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        })
+        return response.ok
+    } catch (e) {
+        console.error(e)
+        return false
+    }
+}
