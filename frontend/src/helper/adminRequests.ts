@@ -42,7 +42,7 @@ export async function createUser(data: {
     }
 }
 
-export async function getAllGroups(): Promise<management.AllDeviceResponse | undefined> {
+export async function getAllGroups(): Promise<management.AllGroupsResponse | undefined> {
     try {
         const response = await fetch("/api/admin/group")
         return await response.json()

@@ -37,7 +37,7 @@
         }
     })
     export default class GroupManagement extends Vue {
-        groups: management.AllDeviceResponse = {
+        groups: management.AllGroupsResponse = {
             groups: [],
             notUserGroupGroups: []
         }
