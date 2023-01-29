@@ -230,21 +230,6 @@ export default class GroupManagement {
     }
 
     /**
-     * get the number of users in a group
-     * @param {{string}} data group data
-     * @return {number} the number of users in the group
-     */
-    static async getUserCountInGroup(data: { groupId: string }): Promise<number> {
-        const group = await GroupManagement.getGroup({ id: data.groupId })
-        if (group == undefined) return 0
-        const [users, count] = await User.getRepository().findAndCount({
-            // eslint-disable-next-line new-cap
-            where: { groups: ArrayContains([data.groupId]) }
-        })
-        return count
-    }
-
-    /**
      * delete a group
      * @param {{string}} data group data
      * @return {boolean} true if the group was deleted, false otherwise

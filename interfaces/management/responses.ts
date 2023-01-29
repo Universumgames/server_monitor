@@ -1,6 +1,7 @@
+import { BasicGroupResponse } from "../responses"
 import { IGroup } from "../types"
 
-export interface AllDeviceResponse {
-    groups: IGroup[]
-    notUserGroupGroups: IGroup[]
+export interface AllGroupsResponse {
+    groups: BasicGroupResponse[]
+    notUserGroupGroups: BasicGroupResponse[]
 }

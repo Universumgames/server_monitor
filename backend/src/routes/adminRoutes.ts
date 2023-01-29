@@ -8,6 +8,7 @@ import * as managementResponses from "server_mgt-lib/management/responses"
 import { User } from "../entities/User"
 import * as requests from "server_mgt-lib/requests"
 import * as managementRequests from "server_mgt-lib/management/requests"
+import { BasicGroupResponse } from "server_mgt-lib/responses"
 
 // eslint-disable-next-line new-cap
 const adminRoutes = express.Router()
@@ -100,10 +101,37 @@ const getGroup = async (req: Request, res: Response, next: NextFunction) => {
         if (groupId == undefined) {
             const groups = await GroupManagement.getGroups()
             const notUserGroupGroups = await GroupManagement.getGroupsNotUserGroup()
-            return res.status(ReturnCode.OK).json({
-                groups: groups,
-                notUserGroupGroups: notUserGroupGroups
-            } as managementResponses.AllDeviceResponse)
+            const responseGroups: BasicGroupResponse[] = await Promise.all(
+                groups.map(async (group) => {
+                    const count = await (
+                        await GroupManagement.getUsersInGroup({ groupId: group.id })
+                    ).length
+                    return {
+                        id: group.id,
+                        name: group.name,
+                        memberCount: count,
+                        ownerId: group.owner.id
+                    }
+                })
+            )
+            const responseUserNotUserGroupGroups: BasicGroupResponse[] = await Promise.all(
+                notUserGroupGroups.map(async (group) => {
+                    const count = await (
+                        await GroupManagement.getUsersInGroup({ groupId: group.id })
+                    ).length
+                    return {
+                        id: group.id,
+                        name: group.name,
+                        memberCount: count,
+                        ownerId: group.owner.id
+                    }
+                })
+            )
+            const body: managementResponses.AllGroupsResponse = {
+                groups: responseGroups,
+                notUserGroupGroups: responseUserNotUserGroupGroups
+            }
+            return res.status(ReturnCode.OK).json(body)
         }
         const group = await GroupManagement.getGroup({ id: groupId })
         if (group == undefined) return res.status(ReturnCode.BAD_REQUEST).end()

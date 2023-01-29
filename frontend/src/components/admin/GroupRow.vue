@@ -1,12 +1,15 @@
 <template>
-    <div class="highlightContainer" style="margin-top: 1ch">
-        <div>{{ group?.name }}</div>
+    <div class="highlightContainer groupRowContainer" style="margin-top: 1ch">
+        <div>Name: {{ group?.name }}</div>
+        <div>UUID: {{ group?.id }}</div>
+        <div>Member Count {{ group?.memberCount }}</div>
+        <div>Owner: {{ group?.ownerId }}</div>
     </div>
 </template>
 
 <script lang="ts">
-    import { IGroup } from "server_mgt-lib/types"
     import { Options, Vue } from "vue-class-component"
+    import * as responses from "server_mgt-lib/responses"
 
     @Options({
         props: {
@@ -14,8 +17,17 @@
         }
     })
     export default class GroupRow extends Vue {
-        group?: IGroup = undefined
+        group?: responses.BasicGroupResponse = undefined
 
         created() {}
     }
 </script>
+
+<style>
+    .groupRowContainer {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>
