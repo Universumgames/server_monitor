@@ -42,3 +42,5 @@ updateList=$(jq -n --argjson piholeUpdates "$piholeUpdates" --argjson adminLTEUp
 responseFile=$(mktemp)
 
 http_code=$(curl -w '%{http_code}' -s -d "deviceToken=$deviceToken&updateList=$updateList" "$serverUrl"/software/pushSystemUpdates -o "$responseFile")
+
+# pihole logo https://wp-cdn.pi-hole.net/wp-content/uploads/2016/12/Vortex-R.webp
