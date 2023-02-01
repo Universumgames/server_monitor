@@ -151,7 +151,7 @@
 
                 this.uptime = this.getUptimeString()
                 this.lastSeenDiff = this.getLastSeenDiff()
-                this.statusColor = getStatusIndicatorColor(this.device!)
+                this.statusColor = this.device != undefined ? getStatusIndicatorColor(this.device) : "var(--secondary-color)"
                 this.updateCount =
                     this.device?.software.filter((update) => update.currentVersion! + update.newVersion)
                         .length ?? 0
@@ -267,6 +267,7 @@
         background-color: var(--bg-color);
         padding: 0.5rem;
         margin: 0.3rem;
+        z-index: 200;
     }
 
     .deviceDetailContent > * {

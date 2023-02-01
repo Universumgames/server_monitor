@@ -63,7 +63,7 @@
 
     .monitoredSoftwareIcon{
         width: 10ch;
-        height: 10ch;
+        height: auto;
         display: block;
         margin: 0 auto;
     }
