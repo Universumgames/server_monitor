@@ -11,3 +11,11 @@ export interface GroupEditRequest {
     newUserMails?: string[]
     deleteUserIds?: string[]
 }
+
+export interface MonitoredDeviceSoftwareRequest {
+    deviceId: string
+    name?: string
+    id?: string
+    imageURL?: string
+    promote: boolean
+}

@@ -5,6 +5,7 @@ import {
     Device,
     DeviceRegistrationToken,
     DeviceSoftware,
+    MonitoredDeviceSoftware,
     SystemIP,
     SystemStatus,
     User
@@ -80,43 +81,6 @@ const registerDevice = async (req: Request, res: Response, next: NextFunction) =
         await registrationToken.save()
 
         return res.status(ReturnCode.OK).json({ token: device.auth_key })
-    } catch (e) {
-        console.error(e)
-        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
-    }
-}
-
-const pushSystemUpdates = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const updateList = getDataFromAny(req, "updateList")
-        // const updateCount = getDataFromAny(req, "updateCount")
-        if (updateList == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
-
-        // @ts-ignore
-        const device = req.device
-        const updateListParsed = JSON.parse(updateList) as ISystemUpdatePost
-        const updateObjs: DeviceSoftware[] = []
-        if (device.software == undefined) device.software = []
-        // clear old system updates
-        device.software = device.software.filter(
-            (software: DeviceSoftware) => !software.isSystemUpdate
-        )
-        // add new system updates
-        for (const update of updateListParsed.updates) {
-            const updateObj = new DeviceSoftware()
-            updateObj.name = update.name
-            updateObj.currentVersion = update.currentVersion
-            updateObj.newVersion = update.newVersion
-            updateObj.device = device
-            updateObj.isSystemUpdate = true
-            updateObjs.push(updateObj)
-        }
-        await DeviceSoftware.save(updateObjs)
-        device.software.push(...updateObjs)
-        device.updateLastSeen()
-        await device.save()
-
-        return res.status(ReturnCode.OK).end()
     } catch (e) {
         console.error(e)
         return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
@@ -243,21 +207,6 @@ export const getBasicDevice = async (req: Request, res: Response, next: NextFunc
     }
 }
 
-export const getSoftwareUpdates = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        // @ts-ignore
-        const deviceID = getDataFromAny(req, "deviceID")
-        if (deviceID == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
-        const software = await DeviceSoftware.find({ where: { device: { id: deviceID } } })
-        if (software == undefined) return res.status(ReturnCode.BAD_REQUEST).end()
-
-        return res.status(ReturnCode.OK).json(software)
-    } catch (e) {
-        console.error(e)
-        return res.status(ReturnCode.INTERNAL_SERVER_ERROR).end()
-    }
-}
-
 export const getDetailedDevice = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // @ts-ignore
@@ -325,13 +274,11 @@ const editDevice = async (req: Request, res: Response, next: NextFunction) => {
 // TODO add editing of device
 
 deviceRoutes.post("/registerDevice", checkRegistrationToken, registerDevice)
-deviceRoutes.post("/pushSystemUpdates", checkDeviceToken, pushSystemUpdates)
 deviceRoutes.post("/pushSystemStatus", checkDeviceToken, pushSystemStatus)
 deviceRoutes.get("/list", checkLoggedIn, listDevices)
 deviceRoutes.get("/listIDs", checkLoggedIn, listDeviceIDs)
 deviceRoutes.get("/:deviceID/state", checkLoggedIn, getDeviceStatus)
 deviceRoutes.get("/:deviceID/basic", checkLoggedIn, getBasicDevice)
-deviceRoutes.get("/:deviceID/software", checkLoggedIn, getSoftwareUpdates)
 deviceRoutes.get("/:deviceID/details", checkLoggedIn, getDetailedDevice)
 deviceRoutes.post("/:deviceID/edit", checkLoggedIn, editDevice)
 deviceRoutes.post("/createDeviceRegistrationToken", checkLoggedIn, createDeviceRegistrationToken)

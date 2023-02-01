@@ -24,6 +24,10 @@ export interface IDeviceSoftware {
     isSystemUpdate: boolean
 }
 
+export interface IMonitoredSoftware extends IDeviceSoftware {
+    imageURL: string
+}
+
 export interface ISystemUpdatePost {
     updates: IDeviceSoftware[]
 }

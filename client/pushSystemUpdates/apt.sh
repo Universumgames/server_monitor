@@ -47,7 +47,7 @@ aptUpdatesToJsonArray=$(echo "$aptUpdatesJsonElements" | jq -s -c .)
 
 aptUpdatesJson="{\"updates\": $aptUpdatesToJsonArray}"
 
-http_code=$(curl -w '%{http_code}' -s -d "deviceToken=$deviceToken&updateCount=$aptUpdateCount&updateList=$aptUpdatesJson" "$serverUrl"/pushSystemUpdates -o "$responseFile")
+http_code=$(curl -w '%{http_code}' -s -d "deviceToken=$deviceToken&updateCount=$aptUpdateCount&updateList=$aptUpdatesJson" "$serverUrl"/software/pushSystemUpdates -o "$responseFile")
 
 content=$(cat "$responseFile")
 rm "$responseFile"

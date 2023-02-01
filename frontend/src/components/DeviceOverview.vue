@@ -63,7 +63,7 @@
             this.currentIntervalId = setInterval(() => {
                 this.getData()
                 this.$forceUpdate()
-            }, 10000)
+            }, 1000 * 10)
 
             this.loading = false
 
@@ -93,6 +93,8 @@
 
             if (this.basicDevice == undefined) {
                 this.error = true
+            }else {
+                this.error = false
             }
         }
 

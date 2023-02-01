@@ -98,7 +98,7 @@ export async function getSystemStatus(deviceId: string): Promise<types.ISystemSt
 
 export async function getSoftware(deviceId: string): Promise<types.IDeviceSoftware[] | undefined> {
     try {
-        const response = await fetch(`/api/device/${deviceId}/software`)
+        const response = await fetch(`/api/software/${deviceId}/softwareList`)
         return await response.json()
     } catch (e) {
         console.warn(e)
@@ -291,6 +291,24 @@ export async function deleteGroup(groupId: string): Promise<boolean> {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(body)
+        })
+        return response.ok
+    } catch (e) {
+        console.error(e)
+        return false
+    }
+}
+
+export async function promoteSoftware(
+    data: requests.MonitoredDeviceSoftwareRequest
+): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/software/promoteSoftware`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
         })
         return response.ok
     } catch (e) {

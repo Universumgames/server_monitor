@@ -7,7 +7,8 @@ import DeviceManagement from "../DeviceManagement"
 
 export const checkDeviceToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const deviceToken = getDeviceToken(req)!
+        const deviceToken = getDeviceToken(req) ?? ""
+        if (deviceToken == "") return res.status(ReturnCode.MISSING_PARAMS).end()
         const device = await Device.findOne({
             where: { auth_key: deviceToken },
             relations: ["software", "status", "status.ipAddresses"]

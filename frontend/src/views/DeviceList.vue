@@ -68,6 +68,8 @@
             this.devices = devices ?? []
             this.devices = this.devices.sort((a, b) => (a.lastSeen < b.lastSeen ? 1 : -1))
 
+            this.$forceUpdate()
+
             if (this.error) {
                 setTimeout(() => {
                     this.loadData()

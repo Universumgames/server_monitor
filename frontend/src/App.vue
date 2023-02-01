@@ -234,6 +234,13 @@
         border-radius: 1ch;
     }
 
+    .highlight2Container {
+        background: var(--bg-color);
+        padding: 1rem;
+        border-radius: 1ch;
+        margin: 1rem;
+    }
+
     .slimHighlightContainer {
         background: var(--secondary-color);
         padding: 0.5rem;

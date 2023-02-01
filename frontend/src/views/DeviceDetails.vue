@@ -26,6 +26,32 @@
                     <label>15 min: {{ device?.status.cpuUsage.avg15m ?? "" }}</label>
                 </div>
             </div>
+            <div class="softwareListContainer">
+                <h2>Software</h2>
+
+                <div class="monitoredUpdateContainer">
+                    <MonitoredSoftware
+                        v-for="software of watchSoftware"
+                        :key="software.id"
+                        :software="software"
+                        @demote="demoteSoftware"
+                        @editImage="editImage" />
+                </div>
+                <h2>Systemupdates</h2>
+                <table class="updateTable">
+                    <tr>
+                        <th>Name</th>
+                        <th>Version</th>
+                        <th>Update</th>
+                        <th></th>
+                    </tr>
+                    <Software
+                        v-for="software of systemUpdates"
+                        :key="software.id"
+                        :software="software"
+                        @promote="promoteSoftware"/>
+                </table>
+            </div>
             <div class="ipContainer">
                 <h2>IP Addresses</h2>
                 <table class="ipTable">
@@ -37,32 +63,6 @@
                         <td>{{ ip.ip }}</td>
                         <td>{{ ip.interface != "" ? ip.interface : "-" }}</td>
                     </tr>
-                </table>
-            </div>
-            <div class="softwareListContainer">
-                <h2>Software</h2>
-                <table class="updateTable">
-                    <tr>
-                        <th>Name</th>
-                        <th>Version</th>
-                        <th>Update</th>
-                    </tr>
-                    <Software
-                        v-for="software of watchSoftware"
-                        :key="software.id"
-                        :software="software" />
-                </table>
-                <h2>Systemupdates</h2>
-                <table class="updateTable">
-                    <tr>
-                        <th>Name</th>
-                        <th>Version</th>
-                        <th>Update</th>
-                    </tr>
-                    <Software
-                        v-for="software of systemUpdates"
-                        :key="software.id"
-                        :software="software" />
                 </table>
             </div>
             <div class="deleteContainer">
@@ -86,6 +86,7 @@
     import { getStatusIndicatorColor } from "@/helper/statusIndicator"
     import StatusIndicator from "@/components/StatusIndicator.vue"
     import Software from "@/components/DeviceDetails/Software.vue"
+    import MonitoredSoftware from "@/components/DeviceDetails/MonitoredSoftware.vue"
     import * as requests from "@/helper/requests"
     import * as adminRequests from "@/helper/adminRequests"
     import GroupChange from "@/components/DeviceDetails/GroupChange.vue"
@@ -97,6 +98,7 @@
         components: {
             StatusIndicator,
             Software,
+            MonitoredSoftware,
             GroupChange
         }
     })
@@ -118,42 +120,50 @@
         }
 
         async getData() {
-            this.device = await getDeviceDetails(this.$route.params.id as string)
+            try{
+                this.device = await getDeviceDetails(this.$route.params.id as string)
 
-            this.systemUpdates =
-                this.device?.software.filter((update) => update.isSystemUpdate) ?? []
-            // sort updates by name
-            this.systemUpdates = this.systemUpdates.sort((a, b) => {
-                if (a.name < b.name) return -1
-                if (a.name > b.name) return 1
-                return 0
-            })
+                this.systemUpdates =
+                    this.device?.software.filter((update) => update.isSystemUpdate) ?? []
+                // sort updates by name
+                this.systemUpdates = this.systemUpdates.sort((a, b) => {
+                    if (a.name < b.name) return -1
+                    if (a.name > b.name) return 1
+                    return 0
+                })
 
-            this.watchSoftware =
-                this.device?.software.filter((update) => !update.isSystemUpdate) ?? []
-            // sort updates by name
-            this.watchSoftware = this.watchSoftware.sort((a, b) => {
-                if (a.name < b.name) return -1
-                if (a.name > b.name) return 1
-                return 0
-            })
+                this.watchSoftware =
+                    this.device?.software.filter((update) => !update.isSystemUpdate) ?? []
+                // sort updates by name
+                this.watchSoftware = this.watchSoftware.sort((a, b) => {
+                    if (a.name < b.name) return -1
+                    if (a.name > b.name) return 1
+                    return 0
+                })
 
-            this.ipAddresses = this.device?.status.ipAddresses ?? []
-            // sort ips by type, ipv4 first
-            this.ipAddresses = this.ipAddresses.sort((a, b) => {
-                if (a.ip.includes(":") && !b.ip.includes(":")) return 1
-                if (!a.ip.includes(":") && b.ip.includes(":")) return -1
-                return 0
-            })
+                this.ipAddresses = this.device?.status.ipAddresses ?? []
+                // sort ips by type, ipv4 first
+                this.ipAddresses = this.ipAddresses.sort((a, b) => {
+                    if (a.ip.includes(":") && !b.ip.includes(":")) return 1
+                    if (!a.ip.includes(":") && b.ip.includes(":")) return -1
+                    return 0
+                })
 
-            this.uptime = this.getUptimeString()
-            this.lastSeenDiff = this.getLastSeenDiff()
-            this.statusColor = getStatusIndicatorColor(this.device!)
-            this.updateCount =
-                this.device?.software.filter((update) => update.currentVersion! + update.newVersion)
-                    .length ?? 0
+                this.uptime = this.getUptimeString()
+                this.lastSeenDiff = this.getLastSeenDiff()
+                this.statusColor = getStatusIndicatorColor(this.device!)
+                this.updateCount =
+                    this.device?.software.filter((update) => update.currentVersion! + update.newVersion)
+                        .length ?? 0
 
-            this.$forceUpdate()
+                this.$forceUpdate()
+            }catch(e){
+                console.error(e)
+            }
+
+            setTimeout(() => {
+                this.getData()
+            }, 1000 * 10)
         }
 
         getLastSeenDiff() {
@@ -213,6 +223,37 @@
                 })
             }
         }
+
+        async promoteSoftware(software: IDeviceSoftware){
+            const imageURL = prompt("Please enter the image URL")
+            await requests.promoteSoftware({
+                deviceId: this.device?.id ?? "",
+                id: software.id,
+                imageURL: imageURL ?? undefined,
+                promote: true,
+            })
+            await this.getData()
+        }
+
+        async demoteSoftware(s: IDeviceSoftware){
+            await requests.promoteSoftware({
+                deviceId: this.device?.id ?? "",
+                id: s.id,
+                promote: false,
+            })
+            await this.getData()
+        }
+
+        async editImage(s: IDeviceSoftware){
+            const imageURL = prompt("Please enter the image URL")
+            await requests.promoteSoftware({
+                deviceId: this.device?.id ?? "",
+                id: s.id,
+                imageURL: imageURL ?? undefined,
+                promote: true,
+            })
+            await this.getData()
+        }
     }
 </script>
 
@@ -251,6 +292,19 @@
 
     .softwareListContainer {
         overflow-x: hidden;
+    }
+
+    .monitoredUpdateContainer {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        gap: 1ch;
+    }
+
+    .monitoredUpdateContainer > * {
+        flex: 1 1 26ch;
+        width: fit-content;
     }
 
     .updateTable {

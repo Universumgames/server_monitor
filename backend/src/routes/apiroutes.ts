@@ -8,6 +8,7 @@ import userRoutes from "./userRouters"
 import { checkAdmin, checkLoggedIn } from "./routehelper"
 import adminRoutes from "./adminRoutes"
 import groupRoutes from "./groupRoutes"
+import softwareRoutes from "./softwareRoutes"
 
 // eslint-disable-next-line new-cap
 const apiRoutes = express.Router()
@@ -77,6 +78,7 @@ apiRoutes.all("/serverInfo", serverInfo)
 apiRoutes.use("/device", deviceRoutes)
 apiRoutes.use("/user", userRoutes)
 apiRoutes.use("/group", checkLoggedIn, groupRoutes)
+apiRoutes.use("/software", softwareRoutes)
 apiRoutes.post("/registerDevice", testRegisterDevice)
 apiRoutes.post("/registerSoftware", testRegisterSoftware)
 apiRoutes.post("/pushSystemUpdates", testPushSystemUpdates)

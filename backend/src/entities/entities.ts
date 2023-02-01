@@ -1,5 +1,5 @@
 import { Device } from "./Device"
-import { DeviceSoftware } from "./DeviceSoftware"
+import { DeviceSoftware, MonitoredDeviceSoftware } from "./DeviceSoftware"
 import { SystemStatus } from "./SystemStatus"
 import { SystemIP } from "./SystemIP"
 import { User } from "./User"
@@ -11,6 +11,7 @@ export {
     Device,
     DeviceRegistrationToken,
     DeviceSoftware,
+    MonitoredDeviceSoftware,
     Group,
     SystemIP,
     SystemStatus,
