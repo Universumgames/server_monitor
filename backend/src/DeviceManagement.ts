@@ -230,6 +230,7 @@ export default class DeviceManagement {
                   deviceId: data.deviceId
               })
         if (device == undefined) return false
+        await DeviceRegistrationToken.delete({ device: { id: device.id } })
         await device.remove()
         return true
     }

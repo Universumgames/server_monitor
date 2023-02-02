@@ -173,8 +173,15 @@ const getDeviceStatus = async (req: Request, res: Response, next: NextFunction) 
                 where: { id: deviceID },
                 relations: ["status", "status.ipAddresses"]
             })
-        )?.status
-        if (status == undefined) return res.status(ReturnCode.UNPROCESSABLE_ENTITY).end()
+        )?.status ?? {
+            uptimeSeconds: 0,
+            cpuUsage: {
+                avg15m: 0,
+                avg1m: 0,
+                avg5m: 0
+            },
+            ipAddresses: []
+        }
 
         return res.status(ReturnCode.OK).json(status)
     } catch (e) {

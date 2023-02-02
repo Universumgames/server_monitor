@@ -1,5 +1,7 @@
 #!/bin/bash
 
+scriptDir=$(dirname "$0")
+
 registerToken=$1
 deviceName=$2
 serverUrl=$3
@@ -34,6 +36,6 @@ if [ "$http_code" != "200" ]; then
 fi
 
 # save device token to file
-echo $(echo "$content" | jq -r '.token') > ./deviceToken
+echo $(echo "$content" | jq -r '.token') > "$scriptDir"/deviceToken
 
-echo "Successfully registered this device as $deviceName with token $(cat ./deviceToken)"
+echo "Successfully registered this device as $deviceName with token $(cat "$scriptDir"/deviceToken)"

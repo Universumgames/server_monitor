@@ -84,6 +84,7 @@ export const checkRegistrationToken = async (req: Request, res: Response, next: 
             await registrationToken.remove()
             return res.status(ReturnCode.UNAUTHORIZED).end()
         }
+        if (registrationToken.device != null) return res.status(ReturnCode.UNAUTHORIZED).end()
         // @ts-ignore
         req.user = registrationToken.user
         // @ts-ignore
