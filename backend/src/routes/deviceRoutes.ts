@@ -195,8 +195,8 @@ export const getBasicDevice = async (req: Request, res: Response, next: NextFunc
         // @ts-ignore
         const deviceID = getDataFromAny(req, "deviceID")
         if (deviceID == undefined) return res.status(ReturnCode.MISSING_PARAMS).end()
-        const device = await DeviceManagement.getDevice(deviceID)
-        if (device == undefined) return res.status(ReturnCode.BAD_REQUEST).end()
+        const device = await DeviceManagement.getDevice({ id: deviceID })
+        if (device == null) return res.status(ReturnCode.BAD_REQUEST).end()
 
         const deviceSend: any = Object.assign({}, device)
         if (
@@ -226,6 +226,7 @@ export const getDetailedDevice = async (req: Request, res: Response, next: NextF
             "status.ipAddresses",
             "software"
         ])
+
         if (device == undefined) return res.status(ReturnCode.UNPROCESSABLE_ENTITY).end()
         if (
             await DeviceManagement.isAccessibleByUser({

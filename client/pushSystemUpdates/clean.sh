@@ -1,6 +1,7 @@
 #!/bin/bash
 
 scriptDir=$(dirname "$0")
+serverUrl=$1
 deviceToken=${2:-$(cat "$scriptDir"/../deviceToken)}
 
 # prompt user for variables if not provided

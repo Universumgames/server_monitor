@@ -141,7 +141,7 @@
                     return 0
                 })
 
-                this.ipAddresses = this.device?.status.ipAddresses ?? []
+                this.ipAddresses = this.device?.status?.ipAddresses ?? []
                 // sort ips by type, ipv4 first
                 this.ipAddresses = this.ipAddresses.sort((a, b) => {
                     if (a.ip.includes(":") && !b.ip.includes(":")) return 1

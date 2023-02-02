@@ -1,4 +1,4 @@
-import { Device, DeviceRegistrationToken } from "./entities/entities"
+import { Device, DeviceRegistrationToken, SystemStatus } from "./entities/entities"
 import { DeviceState } from "server_mgt-lib/types"
 import UserManagement from "./UserManagement"
 import { userIsAdmin } from "./helper"
@@ -83,6 +83,12 @@ export default class DeviceManagement {
         device.auth_key = Device.generateDeviceToken()
         device.group = user!.userGroup!
         device.updateLastSeen()
+
+        device.status = new SystemStatus()
+        device.status.cpuUsage = { avg1m: 0, avg5m: 0, avg15m: 0 }
+        device.status.ipAddresses = []
+        device.status.uptimeSeconds = 0
+        await device.status.save()
 
         return await device.save()
     }
