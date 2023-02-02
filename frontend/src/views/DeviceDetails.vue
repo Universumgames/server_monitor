@@ -161,6 +161,7 @@
                 console.error(e)
             }
 
+            if(this.$route.params.id == undefined) return
             setTimeout(() => {
                 this.getData()
             }, 1000 * 10)

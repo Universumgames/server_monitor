@@ -1,0 +1,10 @@
+[Unit]
+Description=Server Monitor Background Service
+Wants={{ timer_file }}
+
+[Service]
+Type=oneshot
+ExecStart={{ script_file }}
+
+[Install]
+WantedBy=multi-user.target

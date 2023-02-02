@@ -7,6 +7,7 @@
         <div v-show="checkDeviceToken?.deviceId == undefined || checkDeviceToken.deviceId == ''">
             <p>Waiting for Device Registration...</p>
             <p>Token: {{ existingDeviceToken }}</p>
+            <p>Expires: {{ checkDeviceToken?.expires }}</p>
         </div>
         <div v-show="checkDeviceToken?.deviceId != undefined && checkDeviceToken.deviceId != ''">
             <p>Device Registered!</p>

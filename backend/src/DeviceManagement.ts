@@ -82,6 +82,7 @@ export default class DeviceManagement {
         device.state = DeviceState.RUNNING
         device.auth_key = Device.generateDeviceToken()
         device.group = user!.userGroup!
+        device.updateLastSeen()
 
         return await device.save()
     }
