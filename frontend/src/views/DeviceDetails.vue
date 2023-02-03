@@ -1,7 +1,7 @@
 <template>
     <div class="deviceDetailContainer">
-        <h1 @click="editName">
-            Details of {{ device?.name ?? "loading" }}
+        <h1>
+            <label @click="editName">Details of {{ device?.name ?? "loading" }}</label>
             <StatusIndicator
                 :style="'background-color:' + statusColor"
                 :tooltip="getStatusTooltip()" />
