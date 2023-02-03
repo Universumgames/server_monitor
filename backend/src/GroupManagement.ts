@@ -2,7 +2,6 @@ import DeviceManagement from "./DeviceManagement"
 import { Device, Group, User } from "./entities/entities"
 import UserManagement from "./UserManagement"
 import { unique, userIsAdmin } from "./helper"
-import { ArrayContains } from "typeorm"
 
 /**
  * Group management class

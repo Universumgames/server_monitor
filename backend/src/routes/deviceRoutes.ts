@@ -1,15 +1,7 @@
 import { ReturnCode } from "server_mgt-lib/ReturnCode"
-import { DeviceState, ISystemStatus, ISystemUpdatePost } from "server_mgt-lib/types"
+import { DeviceState, ISystemStatus } from "server_mgt-lib/types"
 import express, { NextFunction, Request, Response } from "express"
-import {
-    Device,
-    DeviceRegistrationToken,
-    DeviceSoftware,
-    MonitoredDeviceSoftware,
-    SystemIP,
-    SystemStatus,
-    User
-} from "../entities/entities"
+import { Device, DeviceRegistrationToken, SystemIP, SystemStatus, User } from "../entities/entities"
 import { getDataFromAny, userIsAdmin } from "../helper"
 import { checkDeviceToken, checkLoggedIn, checkRegistrationToken } from "./routehelper"
 import DeviceManagement from "../DeviceManagement"

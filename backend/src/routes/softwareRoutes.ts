@@ -5,7 +5,6 @@ import { DeviceSoftware, MonitoredDeviceSoftware } from "../entities/entities"
 import { getDataFromAny } from "../helper"
 import { checkDeviceToken, checkLoggedIn } from "./routehelper"
 import { MonitoredDeviceSoftwareRequest } from "server_mgt-lib/requests"
-import { ILike, Like } from "typeorm"
 
 // eslint-disable-next-line new-cap
 const softwareRoutes = express.Router()
