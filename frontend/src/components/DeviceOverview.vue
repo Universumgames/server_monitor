@@ -88,7 +88,7 @@
                 this.softwareUpdates == undefined
                     ? 0
                     : this.softwareUpdates.filter(
-                          (update) => update.currentVersion! + update.newVersion
+                          (update) => update.currentVersion != update.newVersion
                       ).length
 
             if (this.basicDevice == undefined) {

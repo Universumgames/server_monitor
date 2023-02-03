@@ -30,6 +30,8 @@ echo "Current Gitlab version: $gitlabVersion"
 
 # get newest gitlab version
 newestGitlabVersion=$(curl -s https://api.github.com/repos/gitlabhq/gitlabhq/tags | jq -r '.[0].name')
+# remove v from version
+newestGitlabVersion=${newestGitlabVersion:1}
 echo "Newest Gitlab version: $newestGitlabVersion"
 
 # push gitlab version to server
