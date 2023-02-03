@@ -153,7 +153,7 @@
                 this.lastSeenDiff = this.getLastSeenDiff()
                 this.statusColor = this.device != undefined ? getStatusIndicatorColor(this.device) : "var(--secondary-color)"
                 this.updateCount =
-                    this.device?.software.filter((update) => update.currentVersion! + update.newVersion)
+                    this.device?.software.filter((update) => update.currentVersion != update.newVersion)
                         .length ?? 0
 
                 this.$forceUpdate()
