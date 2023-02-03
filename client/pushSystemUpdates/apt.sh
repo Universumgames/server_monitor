@@ -34,9 +34,7 @@ aptUpdates=$(echo "$aptOutput" | grep "=>")
 aptUpdateCount=$(echo "$aptUpdates" | wc -l)
 
 # remove multiple spaces, leading spaces from each line
-aptUpdates=$(echo "$aptUpdates" | sed 's/ */ /g' | sed 's/^ *//g')
-# remove newlines
-aptUpdates=$(echo "$aptUpdates" | tr '\n' ' ')
+aptUpdates=$(echo "$aptUpdates" | sed 's/  */ /g' | sed 's/^ *//g')
 # remove "(" and ")" from each line
 aptUpdates=$(echo "$aptUpdates" | sed 's/(//g' | sed 's/)//g')
 

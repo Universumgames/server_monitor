@@ -3,6 +3,7 @@
 scriptDir=$(dirname "$0")
 
 serverUrl=$1
+deviceToken=${2:-$(cat $scriptDir/../deviceToken)}
 
 # prompt user for variables if not provided
 if [ -z "$serverUrl" ]; then
@@ -17,6 +18,10 @@ uptimeSec=$(awk '{print $1}' /proc/uptime)
 echo "Uptime: $uptimeSec seconds"
 
 # get cpu load average
+uptimeSince=$(uptime -s)
+uptimeToUnixtime=$(date -d "$uptimeSince" +%s)
+unixtime=`date +%s`
+uptimeSec=$(($unixtime - $uptimeToUnixtime))
 uptime=$(uptime)
 cpuLoadAVG1m=$(echo "$uptime" | awk '{print $10}' | tr -d ',')
 cpuLoadAVG5m=$(echo "$uptime" | awk '{print $11}' | tr -d ',')
@@ -37,6 +42,6 @@ json=$(jq -n \
   --argjson ipsJSON "$ipsJSON" \
   '{uptimeSeconds: $uptimeSec, cpuUsage: { avg1m: $cpuLoadAVG1m, avg5m: $cpuLoadAVG5m, avg15m: $cpuLoadAVG15m }, ipAddresses: $ipsJSON}')
 
-http_code=$(curl -w '%{http_code}' -s -d "status=$json" "$serverUrl"/device/pushSystemStatus -o "$responseFile")
+http_code=$(curl -w '%{http_code}' -s -d "deviceToken=$deviceToken&status=$json" "$serverUrl"/device/pushSystemStatus -o "$responseFile")
 
 echo "Successfully pushed system load"

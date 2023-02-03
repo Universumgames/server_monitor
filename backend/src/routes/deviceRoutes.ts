@@ -272,6 +272,12 @@ const editDevice = async (req: Request, res: Response, next: NextFunction) => {
                 .status(group?.id == edits.newGroupId ? ReturnCode.OK : ReturnCode.BAD_REQUEST)
                 .end()
         }
+        if (edits.newDeviceName != undefined) {
+            device.name = edits.newDeviceName
+            await device.save()
+            return res.status(ReturnCode.OK).end()
+        }
+
         return res.status(ReturnCode.UNPROCESSABLE_ENTITY).end()
     } catch (e) {
         console.error(e)

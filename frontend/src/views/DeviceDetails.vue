@@ -1,6 +1,6 @@
 <template>
     <div class="deviceDetailContainer">
-        <h1>
+        <h1 @click="editName">
             Details of {{ device?.name ?? "loading" }}
             <StatusIndicator
                 :style="'background-color:' + statusColor"
@@ -158,7 +158,7 @@
 
                 this.$forceUpdate()
             }catch(e){
-                console.error(e)
+                console.warn(e)
             }
 
             if(this.$route.params.id == undefined) return
@@ -252,6 +252,17 @@
                 id: s.id,
                 imageURL: imageURL ?? undefined,
                 promote: true,
+            })
+            await this.getData()
+        }
+
+
+        async editName(){
+            const name = prompt("Please enter the new name")
+            if(name == null) return
+            await requests.editDevice(this.device?.id ?? "", {
+                deviceId: this.device?.id ?? "",
+                newDeviceName: name
             })
             await this.getData()
         }

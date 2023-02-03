@@ -5,7 +5,6 @@ import UserManagement from "../UserManagement"
 import { addSessionCookie, cookieName, getDataFromAny, userIsAdmin } from "../helper"
 import { checkAdmin, checkLoggedIn } from "./routehelper"
 import { User } from "../entities/User"
-import DeviceManagement from "DeviceManagement"
 
 // eslint-disable-next-line new-cap
 const userRoutes = express.Router()
@@ -35,7 +34,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
                 user = await UserManagement.getUser({ username: requestMailData })
             if (user == undefined) return res.status(ReturnCode.UNAUTHORIZED).end()
             await UserManagement.createAndSendLoginMail({ user, req })
-            return res.status(ReturnCode.OK).end()
+            return res.redirect("/")
         }
     } catch (error) {
         console.error(error)

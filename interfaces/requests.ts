@@ -2,6 +2,7 @@ export interface DeviceEditRequest {
     deviceId: string
     delete?: boolean
     newGroupId?: string
+    newDeviceName?: string
 }
 
 export interface GroupEditRequest {

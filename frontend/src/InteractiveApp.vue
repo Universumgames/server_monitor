@@ -26,7 +26,7 @@
         loggedIn: boolean = false
         admin: boolean = false
 
-        frontendVersion = "0.8.1"
+        frontendVersion = "0.8.4"
         backendVersion = "unknown"
 
         user?: IUser = undefined
