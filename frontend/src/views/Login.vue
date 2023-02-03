@@ -36,7 +36,13 @@
         loading = false
         successString = ""
 
-        created() {}
+        created() {
+            const loginToken = this.$route.query.loginToken
+            if(loginToken != undefined) {
+                this.token = loginToken as string
+                this.login()
+            }
+        }
 
         get buttonText() {
             return this.token == "" ? "Request Token" : "Login"

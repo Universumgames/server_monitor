@@ -196,5 +196,5 @@ export default class UserManagement {
  */
 function urlBuilder(req: Request, loginKey: string): string {
     // const port = req.app.settings.port || config.frontEndPort
-    return config.url + "/api/user/login?token=" + encodeURIComponent(loginKey)
+    return config.url + "/login?token=" + encodeURIComponent(loginKey)
 }

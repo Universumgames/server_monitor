@@ -9,7 +9,7 @@
     "serverPort": 6060,
     "frontEndPort": 80,
     "url": "https://server-monitor.mt32.net",
-    "serverVersion": "0.8.4",
+    "serverVersion": "0.8.5",
     "superAdmin": {
         "mail": "programming@universegame.de",
         "username": "universum"
