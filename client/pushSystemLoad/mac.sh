@@ -8,7 +8,7 @@ deviceToken=${2:-$(cat $scriptDir/../deviceToken)}
 # prompt user for variables if not provided
 if [ -z "$serverUrl" ]; then
   echo "Enter server url:"
-  read serverUrl
+  read -r serverUrl
 fi
 
 responseFile=$(mktemp)

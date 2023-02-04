@@ -8,7 +8,7 @@ deviceToken=${2:-$(cat $scriptDir/../deviceToken)}
 # prompt user for variables if not provided
 if [ -z "$serverUrl" ]; then
   echo "Enter server url:"
-  read serverUrl
+  read -r serverUrl
 fi
 
 responseFile=$(mktemp)
@@ -20,7 +20,7 @@ echo "Uptime: $uptimeSec seconds"
 # get cpu load average
 uptimeSince=$(uptime -s)
 uptimeToUnixtime=$(date -d "$uptimeSince" +%s)
-unixtime=`date +%s`
+unixtime=$(date +%s)
 uptimeSec=$(($unixtime - $uptimeToUnixtime))
 uptime=$(uptime)
 cpuLoadAVG1m=$(echo "$uptime" | awk '{print $10}' | tr -d ',')
@@ -31,7 +31,7 @@ echo "Load average: $cpuLoadAVG1m (1m), $cpuLoadAVG5m (5m), $cpuLoadAVG15m (15m)
 # get ips of all interfaces with ip
 # source https://stackoverflow.com/a/12624100/9551386
 ips=$(ip -o addr | awk '!/^[0-9]*: ?lo|link\/ether/ {print $2" "$4}')
-ipsJSON=$(echo "$ips" | jq -R -s -c 'split("\n") | [.[] | {ip: (. | split(" ") | .[0]), interface: (. | split(" ") | .[1])}]')
+ipsJSON=$(echo "$ips" | jq -R -s -c 'split("\n") | [.[] | {ip: (. | split(" ") | .[1]), interface: (. | split(" ") | .[0])}]')
 
 # generate json
 json=$(jq -n \
