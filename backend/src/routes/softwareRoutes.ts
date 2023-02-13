@@ -30,6 +30,7 @@ const pushSystemUpdates = async (req: Request, res: Response, next: NextFunction
         if (device.software == undefined) device.software = []
         // add new system updates
         for (const update of updateListParsed.updates) {
+            if (update.name == undefined || update.currentVersion == undefined) continue
             const existingUpdate = await DeviceSoftware.findOne({
                 where: { name: update.name, device: { id: device.id } }
             })
