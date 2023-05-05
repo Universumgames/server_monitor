@@ -11,50 +11,50 @@
 </template>
 
 <script lang="ts">
-    import { IUser } from "server_mgt-lib/types"
-    import { Options, Vue } from "vue-class-component"
-    import { isLoggedIn, logout } from "./helper/requests"
-    import { getServerInfo, getBasicUser } from "./helper/requests"
-    import Footer from "./components/Footer.vue"
+import { IUser } from "server_mgt-lib/types"
+import { Options, Vue } from "vue-class-component"
+import { isLoggedIn, logout } from "./helper/requests"
+import { getServerInfo, getBasicUser } from "./helper/requests"
+import Footer from "./components/Footer.vue"
 
-    @Options({
-        components: {
-            Footer
-        }
-    })
-    export default class InteractiveApp extends Vue {
-        loggedIn: boolean = false
-        admin: boolean = false
-
-        frontendVersion = "0.8.6"
-        backendVersion = "unknown"
-
-        user?: IUser = undefined
-
-        async created() {
-            this.getData()
-        }
-
-        async getData() {
-            this.loggedIn = await isLoggedIn()
-            this.backendVersion = (await getServerInfo()).version
-            if (!this.loggedIn) {
-                this.$router.push({ name: "Login" })
-            }
-            this.user = await getBasicUser()
-
-            this.admin = this.user?.admin ?? false
-        }
-
-        async logout() {
-            await logout()
-        }
-
-        async onLogin(data: any) {
-            if (data != true) return
-            this.loggedIn = true
-            this.getData()
-            this.$router.push({ name: "Devices" })
-        }
+@Options({
+    components: {
+        Footer
     }
+})
+export default class InteractiveApp extends Vue {
+    loggedIn: boolean = false
+    admin: boolean = false
+
+    frontendVersion = "0.8.7"
+    backendVersion = "unknown"
+
+    user?: IUser = undefined
+
+    async created() {
+        this.getData()
+    }
+
+    async getData() {
+        this.loggedIn = await isLoggedIn()
+        this.backendVersion = (await getServerInfo()).version
+        if (!this.loggedIn) {
+            this.$router.push({ name: "Login", query: { token: this.$route.query.token } })
+        }
+        this.user = await getBasicUser()
+
+        this.admin = this.user?.admin ?? false
+    }
+
+    async logout() {
+        await logout()
+    }
+
+    async onLogin(data: any) {
+        if (data != true) return
+        this.loggedIn = true
+        this.getData()
+        this.$router.push({ name: "Devices" })
+    }
+}
 </script>

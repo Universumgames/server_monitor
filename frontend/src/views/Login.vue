@@ -20,70 +20,70 @@
 </template>
 
 <script lang="ts">
-    import { Options, Vue } from "vue-class-component"
-    import { loginOrRequestMail } from "@/helper/requests"
-    import LoadingScreen from "@/components/LoadingScreen.vue"
+import { Options, Vue } from "vue-class-component"
+import { loginOrRequestMail } from "@/helper/requests"
+import LoadingScreen from "@/components/LoadingScreen.vue"
 
-    @Options({
-        components: {
-            LoadingScreen
-        }
-    })
-    export default class Login extends Vue {
-        requestMail: string = ""
-        token: string = ""
-        errorString = ""
-        loading = false
-        successString = ""
+@Options({
+    components: {
+        LoadingScreen
+    }
+})
+export default class Login extends Vue {
+    requestMail: string = ""
+    token: string = ""
+    errorString = ""
+    loading = false
+    successString = ""
 
-        created() {
-            const loginToken = this.$route.query.loginToken
-            if(loginToken != undefined) {
-                this.token = loginToken as string
-                this.login()
-            }
-        }
-
-        get buttonText() {
-            return this.token == "" ? "Request Token" : "Login"
-        }
-
-        async login() {
-            if (this.loading) return
-            if (this.token == "" && this.requestMail == "") {
-                this.errorString = "Please enter a username or mail or a token"
-                return
-            }
-            this.errorString = ""
-            this.loading = true
-            const result = await loginOrRequestMail({
-                requestMailData: this.requestMail == "" ? undefined : this.requestMail,
-                token: this.token == "" ? undefined : this.token
-            })
-            this.loading = false
-            if (result) {
-                if (this.token == "") this.successString = "Token sent to your mail"
-                else this.$emit("login", true)
-            } else {
-                this.errorString = this.token == "" ? "User not found" : "Token invalid"
-            }
+    created() {
+        const loginToken = this.$route.query.token
+        if (loginToken != undefined) {
+            this.token = loginToken as string
+            this.login()
         }
     }
+
+    get buttonText() {
+        return this.token == "" ? "Request Token" : "Login"
+    }
+
+    async login() {
+        if (this.loading) return
+        if (this.token == "" && this.requestMail == "") {
+            this.errorString = "Please enter a username or mail or a token"
+            return
+        }
+        this.errorString = ""
+        this.loading = true
+        const result = await loginOrRequestMail({
+            requestMailData: this.requestMail == "" ? undefined : this.requestMail,
+            token: this.token == "" ? undefined : this.token
+        })
+        this.loading = false
+        if (result) {
+            if (this.token == "") this.successString = "Token sent to your mail"
+            else this.$emit("login", true)
+        } else {
+            this.errorString = this.token == "" ? "User not found" : "Token invalid"
+        }
+    }
+}
 </script>
 
 <style>
-    .loginContainer {
-        max-width: 80vw;
-        background: var(--secondary-color);
-        margin: auto;
-        border-radius: 1rem;
-        padding: 1rem;
-    }
+.loginContainer {
+    max-width: 80vw;
+    background: var(--secondary-color);
+    margin: auto;
+    border-radius: 1rem;
+    padding: 1rem;
+}
 </style>
 
 <style scoped>
-    input {
-        background: var(--bg-color);
-        width: min(36ch, 80vw);
-    }
+input {
+    background: var(--bg-color);
+    width: min(36ch, 80vw);
+}
 </style>
