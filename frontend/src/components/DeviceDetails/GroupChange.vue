@@ -7,39 +7,35 @@
     </select>
 </template>
 
-<script lang="ts">
-    import { IDevice, IGroup } from "server_mgt-lib/types"
-    import { Options, Vue } from "vue-class-component"
-    import * as requests from "@/helper/requests"
-    import * as responses from "server_mgt-lib/responses"
+<script setup lang="ts">
+import { ref, onMounted, watch } from 'vue'
+import { type IDevice, type IGroup } from "server_mgt-lib/types"
+import * as requests from "../../helper/requests"
+import * as responses from "server_mgt-lib/responses"
 
-    @Options({
-        props: {
-            device: Object,
-            enabled: Boolean
-        }
-    })
-    export default class GroupChange extends Vue {
-        device?: IDevice = undefined
-        groups: responses.BasicGroupResponse[] = []
-        allGroups: responses.BasicGroupResponse[] = []
-        enabled = false
+const props = defineProps<{
+    device: IDevice,
+    enabled: boolean
+}>()
 
-        selectedGroupId: string = ""
-        selectedGroup: IGroup | undefined = undefined
+const groups = ref<responses.BasicGroupResponse[]>([])
+const allGroups = ref<responses.BasicGroupResponse[]>([])
+const selectedGroupId = ref<string>("")
+const selectedGroup = ref<IGroup | undefined>(undefined)
 
-        async mounted() {
-            this.allGroups = (await requests.getAvailableGroups())?.groups ?? []
-            this.groups = this.allGroups.filter((group) => group.id != this.device?.group.id)
-            this.selectedGroupId = this.device?.group.id ?? ""
-            this.selectedGroup = this.device?.group
-        }
+onMounted(async () => {
+    allGroups.value = (await requests.getAvailableGroups())?.groups ?? []
+    groups.value = allGroups.value.filter((group) => group.id != props.device.group.id)
+    selectedGroupId.value = props.device.group.id ?? ""
+    selectedGroup.value = props.device.group
+})
 
-        async onChange() {
-            await requests.editDevice(this.device?.id ?? "", {
-                deviceId: this.device?.id ?? "",
-                newGroupId: this.selectedGroupId
-            })
-        }
+watch(selectedGroupId, async (newGroupId) => {
+    if (newGroupId !== props.device.group.id) {
+        await requests.editDevice(props.device.id, {
+            deviceId: props.device.id,
+            newGroupId: newGroupId
+        })
     }
+})
 </script>

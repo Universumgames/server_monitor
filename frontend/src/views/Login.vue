@@ -19,54 +19,51 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Options, Vue } from "vue-class-component"
-import { loginOrRequestMail } from "@/helper/requests"
-import LoadingScreen from "@/components/LoadingScreen.vue"
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { loginOrRequestMail } from "../helper/requests"
+import LoadingScreen from "../components/LoadingScreen.vue"
 
-@Options({
-    components: {
-        LoadingScreen
+const requestMail = ref<string>("")
+const token = ref<string>("")
+const errorString = ref<string>("")
+const loading = ref<boolean>(false)
+const successString = ref<string>("")
+
+const route = useRoute()
+const router = useRouter()
+
+const buttonText = computed(() => {
+    return token.value.length == 0 ? "Request Token" : "Login"
+})
+
+onMounted(() => {
+    const loginToken = route.query.token
+    if (loginToken != undefined) {
+        token.value = loginToken as string
+        login()
     }
 })
-export default class Login extends Vue {
-    requestMail: string = ""
-    token: string = ""
-    errorString = ""
-    loading = false
-    successString = ""
 
-    created() {
-        const loginToken = this.$route.query.token
-        if (loginToken != undefined) {
-            this.token = loginToken as string
-            this.login()
-        }
+const login = async () => {
+    if (loading.value) return
+    if (token.value === "" && requestMail.value === "") {
+        errorString.value = "Please enter a username or mail or a token"
+        return
     }
-
-    get buttonText() {
-        return this.token == "" ? "Request Token" : "Login"
-    }
-
-    async login() {
-        if (this.loading) return
-        if (this.token == "" && this.requestMail == "") {
-            this.errorString = "Please enter a username or mail or a token"
-            return
-        }
-        this.errorString = ""
-        this.loading = true
-        const result = await loginOrRequestMail({
-            requestMailData: this.requestMail == "" ? undefined : this.requestMail,
-            token: this.token == "" ? undefined : this.token
-        })
-        this.loading = false
-        if (result) {
-            if (this.token == "") this.successString = "Token sent to your mail"
-            else this.$emit("login", true)
-        } else {
-            this.errorString = this.token == "" ? "User not found" : "Token invalid"
-        }
+    errorString.value = ""
+    loading.value = true
+    const result = await loginOrRequestMail({
+        requestMailData: requestMail.value === "" ? undefined : requestMail.value,
+        token: token.value === "" ? undefined : token.value
+    })
+    loading.value = false
+    if (result) {
+        if (token.value === "") successString.value = "Token sent to your mail"
+        else router.push({ name: "Home" }) // Assuming you want to redirect to Home after login
+    } else {
+        errorString.value = token.value === "" ? "User not found" : "Token invalid"
     }
 }
 </script>

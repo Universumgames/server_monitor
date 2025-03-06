@@ -6,9 +6,7 @@
         <div class="smallGroupEntryContainer">
             <div v-for="user of group?.users" :key="user.id" class="slimHighlightContainer">
                 {{ user.username }}
-                <button
-                    :class="'delete' + (isButtonDisabled(user) ? ' btn-disabled' : '')"
-                    @click="removeUser(user)">
+                <button :class="'delete' + (isButtonDisabled(user) ? ' btn-disabled' : '')" @click="removeUser(user)">
                     x
                 </button>
             </div>
@@ -35,73 +33,67 @@
     </div>
 </template>
 
-<script lang="ts">
-    import { IUser } from "server_mgt-lib/types"
-    import { Options, Vue } from "vue-class-component"
-    import * as requests from "@/helper/requests"
-    import * as responses from "server_mgt-lib/responses"
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import * as requests from "../helper/requests"
+import { type IUser } from "server_mgt-lib/types"
+import * as responses from "server_mgt-lib/responses"
 
-    @Options({
-        props: {
-            user: Object
-        }
-    })
-    export default class GroupEdit extends Vue {
-        user?: IUser = undefined
+const props = defineProps<{ user: IUser }>()
 
-        group: responses.DetailedGroupResponse | undefined = undefined
-        groupId: string = ""
+const user = ref<IUser | undefined>(props.user)
+const group = ref<responses.DetailedGroupResponse | undefined>(undefined)
+const groupId = ref<string>("")
 
-        addingUser: boolean = false
-        addingDevice: boolean = false
-        userAddMail: string = ""
-        userAddError: string = ""
+const addingUser = ref<boolean>(false)
+const addingDevice = ref<boolean>(false)
+const userAddMail = ref<string>("")
+const userAddError = ref<string>("")
 
-        async created() {
-            this.groupId = (this.$route.params.id as string) ?? ""
-            await this.getData()
-        }
+const route = useRoute()
 
-        async getData() {
-            this.group = await requests.getGroupDetails(this.groupId)
-            this.$forceUpdate()
-        }
+onMounted(async () => {
+    groupId.value = (route.params.id as string) ?? ""
+    await getData()
+})
 
-        isButtonDisabled(user: IUser) {
-            return this.group?.owner.id == user?.id
-        }
+const getData = async () => {
+    group.value = await requests.getGroupDetails(groupId.value)
+}
 
-        async addUser() {
-            this.addingUser = false
-            if (this.userAddMail == "") return
-            const result = await requests.addUserToGroup(this.groupId, this.userAddMail)
+const isButtonDisabled = (user: IUser) => {
+    return group.value?.owner.id === user?.id
+}
 
-            if (result) {
-                this.userAddError = ""
-                await this.getData()
-            } else {
-                this.userAddError = "User not found"
-            }
+const addUser = async () => {
+    addingUser.value = false
+    if (userAddMail.value === "") return
+    const result = await requests.addUserToGroup(groupId.value, userAddMail.value)
 
-            this.$forceUpdate()
-        }
-
-        async removeUser(user: IUser) {
-            if (this.isButtonDisabled(user)) return
-            await requests.removeUserFromGroup(this.groupId, user.id)
-            await this.getData()
-        }
+    if (result) {
+        userAddError.value = ""
+        await getData()
+    } else {
+        userAddError.value = "User not found"
     }
+}
+
+const removeUser = async (user: IUser) => {
+    if (isButtonDisabled(user)) return
+    await requests.removeUserFromGroup(groupId.value, user.id)
+    await getData()
+}
 </script>
 
 <style>
-    .smallGroupEntryContainer {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        padding: 5px;
-        border-radius: 5px;
-        margin: 5px;
-    }
+.smallGroupEntryContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    border-radius: 5px;
+    margin: 5px;
+}
 </style>

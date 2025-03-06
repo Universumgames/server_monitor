@@ -2,10 +2,7 @@
     <h1>Groupmanagement</h1>
     <div class="highlightContainer">
         <label>Show usergroups</label>
-        <Toggle
-            style="margin: 1ch"
-            @toggleChange="onShowUserGroupsChange"
-            :initialValue="showAllGroups" />
+        <Toggle style="margin: 1ch" @toggleChange="onShowUserGroupsChange" :initialValue="showAllGroups" />
     </div>
     <div>
         <div v-show="showAllGroups">
@@ -19,43 +16,36 @@
     </div>
 </template>
 
-<script lang="ts">
-    import { Options, Vue } from "vue-class-component"
-    import * as adminRequests from "@/helper/adminRequests"
-    import * as management from "server_mgt-lib/management/responses"
-    import Toggle from "@/components/Toggle.vue"
-    import GroupRow from "@/components/admin/GroupRow.vue"
-    import { IUser } from "server_mgt-lib/types"
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import * as adminRequests from "../../helper/adminRequests"
+import * as management from "server_mgt-lib/management/responses"
+import Toggle from "../../components/Toggle.vue"
+import GroupRow from "../../components/admin/GroupRow.vue"
+import { type IUser } from "server_mgt-lib/types"
 
-    @Options({
-        props: {
-            user: Object
-        },
-        components: {
-            Toggle,
-            GroupRow
-        }
-    })
-    export default class GroupManagement extends Vue {
-        groups: management.AllGroupsResponse = {
-            groups: [],
-            notUserGroupGroups: []
-        }
+const props = defineProps<{ user: IUser }>()
 
-        showAllGroups = false
-        user?: IUser = undefined
+const groups = ref<management.AllGroupsResponse>({
+    groups: [],
+    notUserGroupGroups: []
+})
 
-        async created() {
-            this.groups = (await adminRequests.getAllGroups()) ?? {
-                groups: [],
-                notUserGroupGroups: []
-            }
+const showAllGroups = ref<boolean>(false)
+const user = ref<IUser | undefined>(props.user)
 
-            this.$forceUpdate()
-        }
-
-        onShowUserGroupsChange(newValue: boolean) {
-            this.showAllGroups = newValue
-        }
+const getAllGroups = async () => {
+    groups.value = (await adminRequests.getAllGroups()) ?? {
+        groups: [],
+        notUserGroupGroups: []
     }
+}
+
+const onShowUserGroupsChange = (newValue: boolean) => {
+    showAllGroups.value = newValue
+}
+
+onMounted(async () => {
+    await getAllGroups()
+})
 </script>

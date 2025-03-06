@@ -7,26 +7,17 @@
     <router-view />
 </template>
 
-<script lang="ts">
-    import { IUser } from "server_mgt-lib/types"
-    import { Options, Vue } from "vue-class-component"
+<script setup lang="ts">
+import { type IUser } from "server_mgt-lib/types"
 
-    @Options({
-        props: {
-            user: Object
-        }
-    })
-    export default class Management extends Vue {
-        user?: IUser = undefined
+const props = defineProps<{ user: IUser }>()
 
-        created() {}
-    }
 </script>
 
 <style>
-    .managementNav {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-    }
+.managementNav {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
 </style>

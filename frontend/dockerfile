@@ -4,8 +4,6 @@ WORKDIR /server_monitor/frontend
 COPY ./frontend/ .
 COPY ./interfaces/ ../interfaces/
 RUN npm install --legacy-peer-deps
-RUN cd ../interfaces && npm install
-RUN npm link ../interfaces
 RUN npm run build
 
 from caddy

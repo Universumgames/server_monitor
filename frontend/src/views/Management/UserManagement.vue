@@ -7,59 +7,43 @@
 
     <div>
         <h2>Userlist</h2>
-        <UserRow
-            v-for="user in users"
-            :key="user.id"
-            :user="user"
-            @deleteUser="getData()"
-            style="margin-top: 1ch" />
+        <UserRow v-for="user in users" :key="user.id" :user="user" @deleteUser="getData()" style="margin-top: 1ch" />
     </div>
 </template>
 
-<script lang="ts">
-    import { IUser } from "server_mgt-lib/types"
-    import { Options, Vue } from "vue-class-component"
-    import CreateUser from "@/components/admin/CreateUser.vue"
-    import UserRow from "@/components/admin/UserRow.vue"
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { type IUser } from "server_mgt-lib/types"
+import CreateUser from "../../components/admin/CreateUser.vue"
+import UserRow from "../../components/admin/UserRow.vue"
+import * as adminRequests from "../../helper/adminRequests"
 
-    import * as adminRequests from "@/helper/adminRequests"
+const props = defineProps<{ user: IUser }>()
 
-    @Options({
-        components: {
-            CreateUser,
-            UserRow
-        },
-        props: {
-            user: Object
-        }
+const user = ref<IUser | undefined>(props.user)
+const creatingUser = ref<boolean>(false)
+const users = ref<IUser[]>([])
+
+const router = useRouter()
+
+onMounted(async () => {
+    await getData()
+    /*if (!user.value?.admin) {
+        router.replace({ name: "Devices" })
+    }*/
+})
+
+const getData = async () => {
+    users.value = (await adminRequests.getUsers()) ?? []
+}
+
+const createUser = async (newUser: IUser) => {
+    await adminRequests.createUser({
+        username: newUser.username,
+        email: newUser.email
     })
-    export default class UserManagement extends Vue {
-        user?: IUser = undefined
-        creatingUser = false
-        users: IUser[] = []
-
-        async created() {
-            await this.getData()
-        }
-
-        async getData() {
-            this.users = (await adminRequests.getUsers()) ?? []
-            this.$forceUpdate()
-        }
-
-        mounted(): void {
-            /*if (!this.user?.admin) {
-                this.$router.replace({ name: "Devices" })
-            }*/
-        }
-
-        async createUser(user: IUser) {
-            await adminRequests.createUser({
-                username: user.username,
-                email: user.email
-            })
-            this.creatingUser = false
-            await this.getData()
-        }
-    }
+    creatingUser.value = false
+    await getData()
+}
 </script>

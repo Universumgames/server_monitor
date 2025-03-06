@@ -7,27 +7,17 @@
     </div>
 </template>
 
-<script lang="ts">
-    import { Options, Vue } from "vue-class-component"
-    import * as responses from "server_mgt-lib/responses"
+<script setup lang="ts">
+import * as responses from "server_mgt-lib/responses"
 
-    @Options({
-        props: {
-            group: Object
-        }
-    })
-    export default class GroupRow extends Vue {
-        group?: responses.BasicGroupResponse = undefined
-
-        created() {}
-    }
+const props = defineProps<{ group: responses.BasicGroupResponse }>()
 </script>
 
 <style>
-    .groupRowContainer {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-    }
+.groupRowContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
 </style>

@@ -16,48 +16,39 @@
     </div>
 </template>
 
-<script lang="ts">
-    import { Options, Vue } from "vue-class-component"
-    import * as requests from "@/helper/requests"
-    import {
-        CheckDeviceRegistrationResponse,
-        CreateDeviceRegistrationResponse
-    } from "server_mgt-lib/responses"
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import * as requests from "../helper/requests"
+import {
+    type CheckDeviceRegistrationResponse,
+    type CreateDeviceRegistrationResponse
+} from "server_mgt-lib/responses"
 
-    @Options({})
-    export default class DeviceRegistration extends Vue {
-        existingDeviceToken: string = ""
-        newDeviceToken?: CreateDeviceRegistrationResponse
-        checkDeviceToken?: CheckDeviceRegistrationResponse
+const existingDeviceToken = ref<string>("")
+const newDeviceToken = ref<CreateDeviceRegistrationResponse | undefined>()
+const checkDeviceToken = ref<CheckDeviceRegistrationResponse | undefined>()
 
-        async created() {
-            this.existingDeviceToken = (this.$route.params.token as string) ?? ""
+const route = useRoute()
+const router = useRouter()
 
-            if (this.existingDeviceToken == "") {
-                this.newDeviceToken = await requests.createDeviceRegistrationToken()
-                this.existingDeviceToken = this.newDeviceToken?.token ?? ""
-                this.$router.replace({ params: { token: this.existingDeviceToken } })
-            }
-            await this.checkToken()
-        }
+onMounted(async () => {
+    existingDeviceToken.value = (route.params.token as string) ?? ""
 
-        async checkToken() {
-            this.checkDeviceToken = await requests.checkDeviceRegistrationToken(
-                this.existingDeviceToken
-            )
-            console.log(this.checkDeviceToken)
-
-            this.$forceUpdate()
-
-            if (
-                this.checkDeviceToken?.deviceId != undefined &&
-                this.checkDeviceToken.deviceId != ""
-            )
-                return
-
-            setTimeout(() => {
-                this.checkToken()
-            }, 1000 * 10)
-        }
+    if (existingDeviceToken.value === "") {
+        newDeviceToken.value = await requests.createDeviceRegistrationToken()
+        existingDeviceToken.value = newDeviceToken.value?.token ?? ""
+        router.replace({ params: { token: existingDeviceToken.value } })
     }
+    await checkToken()
+})
+
+const checkToken = async () => {
+    checkDeviceToken.value = await requests.checkDeviceRegistrationToken(existingDeviceToken.value)
+    console.log(checkDeviceToken.value)
+
+    if (checkDeviceToken.value?.deviceId === undefined || checkDeviceToken.value.deviceId === '') {
+        setTimeout(checkToken, 1000 * 10)
+    }
+}
 </script>

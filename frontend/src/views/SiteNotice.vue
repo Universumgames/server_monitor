@@ -1,37 +1,21 @@
 <template>
-    <vue-markdown class="text" :source="markdown" />
+    <vue-markdown :source="markdown" class="text" />
 </template>
 
-<script lang="ts">
-    import { Options, Vue } from "vue-class-component"
-    import VueMarkdown from "vue-markdown-render"
+<script setup lang="ts">
+import VueMarkdown from "vue-markdown-render"
+import { onMounted, ref } from "vue"
 
-    @Options({
-        components: {
-            VueMarkdown
-        },
-        props: {
-            language: Object
-        }
-    })
-    export default class SiteNotice extends Vue {
-        markdown: string = ""
+const markdown = ref("")
 
-        async created() {
-            this.loadMarkdown()
-        }
-
-        mounted() {}
-
-        async loadMarkdown() {
-            const filename = "/en_site_notice.md"
-            this.markdown = await (await fetch(filename)).text()
-        }
-    }
+onMounted(async () => {
+    const filename = "/en_site_notice.md"
+    markdown.value = await (await fetch(filename)).text()
+})
 </script>
 
 <style scoped>
-    .text {
-        text-align: left;
-    }
+.text {
+    text-align: left;
+}
 </style>

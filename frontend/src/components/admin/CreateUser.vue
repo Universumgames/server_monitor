@@ -8,28 +8,24 @@
     </div>
 </template>
 
-<script lang="ts">
-    import { IUser } from "server_mgt-lib/types"
-    import { Options, Vue } from "vue-class-component"
+<script setup lang="ts">
+import { ref } from 'vue'
+import { type IUser } from "server_mgt-lib/types"
+import { defineEmits } from 'vue'
 
-    @Options({
-        emits: ["createUser", "cancel"]
-    })
-    export default class CreateUser extends Vue {
-        username: string = ""
-        email: string = ""
+const emit = defineEmits(['createUser', 'cancel'])
 
-        created() {}
+const username = ref<string>("")
+const email = ref<string>("")
 
-        createUser() {
-            this.$emit("createUser", {
-                username: this.username,
-                email: this.email
-            } as IUser)
-        }
+const createUser = () => {
+    emit('createUser', {
+        username: username.value,
+        email: email.value
+    } as IUser)
+}
 
-        cancel() {
-            this.$emit("cancel")
-        }
-    }
+const cancel = () => {
+    emit('cancel')
+}
 </script>

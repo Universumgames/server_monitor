@@ -1,10 +1,9 @@
-import { createRouter, createWebHashHistory, createWebHistory } from "vue-router"
-import Home from "../views/Home.vue"
+import { createRouter, createWebHashHistory } from "vue-router"
 
 const routes = [
     {
         path: "/",
-        component: () => import(/* webpackChunkName: "layout" */ "../InteractiveApp.vue"),
+        component: () => import("../InteractiveApp.vue"),
         children: [
             {
                 path: "/",
@@ -96,7 +95,7 @@ const routes = [
     {
         path: "/overview/:id?",
         component: () =>
-            import(/* webpackChunkName: "layout" */ "../views/DeviceOverviewStandalone.vue"),
+            import("../views/DeviceOverviewStandalone.vue"),
         meta: {
             title: "Device Overview"
         }
@@ -104,9 +103,8 @@ const routes = [
 ]
 
 const router = createRouter({
-    history: createWebHistory(process.env.BASE_URL), // to use this, you would have to configure the webserver, see https://router.vuejs.org/guide/essentials/history-mode.html#hash-mode
-    //history: createWebHashHistory(),
-    routes
+    history: createWebHashHistory(),
+    routes: routes
 })
 
 export default router

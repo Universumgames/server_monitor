@@ -6,153 +6,128 @@
         <div v-else>
             <h3>
                 {{ basicDevice?.name ?? deviceName }}
-                <StatusIndicator
-                    :style="'background-color:' + statusColor"
-                    :tooltip="getStatusTooltip()" />
+                <StatusIndicator :style="'background-color:' + statusColor" :tooltip="getStatusTooltip()" />
             </h3>
-            <small>{{ basicDevice?.id ?? deviceId }}</small
-            ><br />
-            <small>Powerstate: {{ basicDevice?.state ?? "" }}</small
-            ><br />
+            <small>{{ basicDevice?.id ?? deviceId }}</small><br />
+            <small>Powerstate: {{ basicDevice?.state ?? "" }}</small><br />
             <small>Last contact ~{{ lastSeenDiff }} ago</small><br />
-            <small>Uptime: ~{{ uptime }}</small
-            ><br />
+            <small>Uptime: ~{{ uptime }}</small><br />
             <small>Software updates: {{ updateCount }}</small>
         </div>
     </div>
 </template>
 
-<script lang="ts">
-    import { IDevice, IDeviceSoftware, ISystemStatus } from "server_mgt-lib/types"
-    import { Options, Vue } from "vue-class-component"
-    import { getSystemStatus, getBasicDevice, getSoftware } from "@/helper/requests"
-    import StatusIndicator from "@/components/StatusIndicator.vue"
-    import { getStatusIndicatorColor } from "@/helper/statusIndicator"
-    import BlankDeviceOverview from "./Blanks/BlankDeviceOverview.vue"
+<script lang="ts" setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { type IDevice, type IDeviceSoftware, type ISystemStatus } from "server_mgt-lib/types"
+import { getSystemStatus, getBasicDevice, getSoftware } from "../helper/requests"
+import { getStatusIndicatorColor } from "../helper/statusIndicator"
+import StatusIndicator from "./StatusIndicator.vue"
+import BlankDeviceOverview from "./Blanks/BlankDeviceOverview.vue"
 
-    @Options({
-        props: {
-            deviceName: String,
-            deviceId: String
-        },
-        components: {
-            StatusIndicator,
-            BlankDeviceOverview
-        }
-    })
-    export default class DeviceOverview extends Vue {
-        deviceName?: string
-        deviceId!: string
-        basicDevice?: IDevice
-        systemStatus?: ISystemStatus
-        softwareUpdates?: IDeviceSoftware[]
+const props = defineProps<{
+    deviceName: string,
+    deviceId: string
+}>()
 
-        loading: boolean = true
-        error: boolean = false
+const router = useRouter()
 
-        uptime = ""
-        lastSeenDiff = ""
-        statusColor = "var(--secondary-color)"
-        updateCount = 0
+const basicDevice = ref<IDevice | undefined>(undefined)
+const systemStatus = ref<ISystemStatus | undefined>(undefined)
+const softwareUpdates = ref<IDeviceSoftware[] | undefined>(undefined)
 
-        currentIntervalId?: number
+const loading = ref<boolean>(true)
+const error = ref<boolean>(false)
 
-        async mounted() {
-            this.getData()
+const uptime = ref<string>("")
+const lastSeenDiff = ref<string>("")
+const statusColor = ref<string>("var(--secondary-color)")
+const updateCount = ref<number>(0)
 
-            this.currentIntervalId = setInterval(() => {
-                this.getData()
-                this.$forceUpdate()
-            }, 1000 * 10)
+let currentIntervalId: number | undefined
 
-            this.loading = false
+const getData = async () => {
+    basicDevice.value = await getBasicDevice(props.deviceId)
+    systemStatus.value = await getSystemStatus(props.deviceId)
+    softwareUpdates.value = await getSoftware(props.deviceId)
+    uptime.value = getUptimeString()
+    lastSeenDiff.value = getLastSeenDiff()
+    statusColor.value = basicDevice.value == undefined ? "gray" : getStatusIndicatorColor(basicDevice.value)
+    updateCount.value = softwareUpdates.value == undefined ? 0 : softwareUpdates.value.filter((update: IDeviceSoftware) => update.currentVersion != update.newVersion).length
 
-            this.$forceUpdate()
-        }
+    error.value = basicDevice.value == undefined
+}
 
-        unmounted() {
-            if (this.currentIntervalId != undefined) {
-                clearInterval(this.currentIntervalId)
-            }
-        }
+const getLastSeenDiff = () => {
+    const diffSec = (new Date().getTime() - new Date(basicDevice.value?.lastSeen ?? 0).getTime()) / 1000
 
-        async getData() {
-            this.basicDevice = await getBasicDevice(this.deviceId)
-            this.systemStatus = await getSystemStatus(this.deviceId)
-            this.softwareUpdates = await getSoftware(this.deviceId)
-            this.uptime = this.getUptimeString()
-            this.lastSeenDiff = this.getLastSeenDiff()
-            this.statusColor =
-                this.basicDevice == undefined ? "gray" : getStatusIndicatorColor(this.basicDevice)
-            this.updateCount =
-                this.softwareUpdates == undefined
-                    ? 0
-                    : this.softwareUpdates.filter(
-                          (update) => update.currentVersion != update.newVersion
-                      ).length
+    if (diffSec < 200) return diffSec.toFixed(0) + " seconds"
+    const diffMin = diffSec / 60
+    if (diffMin < 120) return diffMin.toFixed(0) + " minutes"
+    const diffHour = diffMin / 60
+    if (diffHour < 48) return diffHour.toFixed(0) + " hours"
+    const diffDay = diffHour / 24
+    return diffDay.toFixed(0) + " days"
+}
 
-            if (this.basicDevice == undefined) {
-                this.error = true
-            }else {
-                this.error = false
-            }
-        }
+const getUptimeString = (): string => {
+    const uptimeSec = systemStatus.value?.uptimeSeconds ?? 0
+    if (uptimeSec < 200) return uptimeSec.toFixed(0) + " seconds"
+    const uptimeMin = uptimeSec / 60
+    if (uptimeMin < 120) return uptimeMin.toFixed(0) + " minutes"
+    const uptimeHour = uptimeMin / 60
+    if (uptimeHour < 48) return uptimeHour.toFixed(0) + " hours"
+    const uptimeDay = uptimeHour / 24
+    return uptimeDay.toFixed(0) + " days"
+}
 
-        getLastSeenDiff() {
-            const diffSec =
-                (new Date().getTime() - new Date(this.basicDevice?.lastSeen ?? 0).getTime()) / 1000
+const getStatusTooltip = () => {
+    return (
+        (basicDevice.value?.state ?? "Unknown state") +
+        " \n" +
+        uptime.value +
+        " up \n" +
+        updateCount.value +
+        " Updates available"
+    )
+}
 
-            if (diffSec < 200) return diffSec.toFixed(0) + " seconds"
-            const diffMin = diffSec / 60
-            if (diffMin < 120) return diffMin.toFixed(0) + " minutes"
-            const diffHour = diffMin / 60
-            if (diffHour < 48) return diffHour.toFixed(0) + " hours"
-            const diffDay = diffHour / 24
-            return diffDay.toFixed(0) + " days"
-        }
+const routeToDetails = () => {
+    router.push({ name: "DeviceDetails", params: { id: props.deviceId } })
+}
 
-        getUptimeString(): string {
-            const uptimeSec = this.systemStatus?.uptimeSeconds ?? 0
-            if (uptimeSec < 200) return uptimeSec.toFixed(0) + " seconds"
-            const uptimeMin = uptimeSec / 60
-            if (uptimeMin < 120) return uptimeMin.toFixed(0) + " minutes"
-            const uptimeHour = uptimeMin / 60
-            if (uptimeHour < 48) return uptimeHour.toFixed(0) + " hours"
-            const uptimeDay = uptimeHour / 24
-            return uptimeDay.toFixed(0) + " days"
-        }
+onMounted(async () => {
+    await getData()
 
-        getStatusTooltip() {
-            return (
-                (this.basicDevice?.state ?? "Unknown state") +
-                " \n" +
-                this.uptime +
-                " up \n" +
-                this.updateCount +
-                " Updates available"
-            )
-        }
+    currentIntervalId = setInterval(async () => {
+        await getData()
+    }, 1000 * 10)
 
-        routeToDetails() {
-            this.$router.push({ name: "DeviceDetails", params: { id: this.deviceId } })
-        }
+    loading.value = false
+})
+
+onUnmounted(() => {
+    if (currentIntervalId != undefined) {
+        clearInterval(currentIntervalId)
     }
+})
 </script>
 
 <style>
-    .deviceOverviewContainer {
-        background-color: var(--secondary-color);
-        border-radius: 1ch;
-        padding: 1ch;
-        text-align: left;
-        cursor: pointer;
-    }
+.deviceOverviewContainer {
+    background-color: var(--secondary-color);
+    border-radius: 1ch;
+    padding: 1ch;
+    text-align: left;
+    cursor: pointer;
+}
 
-    .deviceOverviewContainer h3 {
-        margin: 0;
-    }
+.deviceOverviewContainer h3 {
+    margin: 0;
+}
 
-    .deviceOverviewContainer small {
-        color: var(--primary-color);
-    }
+.deviceOverviewContainer small {
+    color: var(--primary-color);
+}
 </style>

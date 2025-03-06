@@ -1,10 +1,8 @@
 <template>
     <div class="deviceDetailContainer">
         <h1>
-            <label @click="editName">Details of {{ device?.name ?? "loading" }}</label>
-            <StatusIndicator
-                :style="'background-color:' + statusColor"
-                :tooltip="getStatusTooltip()" />
+            <label ..click="editName">Details of {{ device?.name ?? "loading" }}</label>
+            <StatusIndicator :style="'background-color:' + statusColor" :tooltip="getStatusTooltip()" />
         </h1>
         <div class="deviceDetailContent">
             <div class="simpleData">
@@ -13,9 +11,9 @@
                 <label>Uptime: ~{{ uptime }}</label>
                 <label>Last seen: ~{{ lastSeenDiff }} ago</label>
                 <label>Updates: {{ updateCount }}</label>
-                <label
-                    >Group: <GroupChange :device="device" :enabled="user?.id == device?.owner.id"
-                /></label>
+                <label>Group:
+                    <GroupChange :device="device" :enabled="user?.id == device?.owner.id" />
+                </label>
                 <label>Owner: {{ device?.owner.username }}</label>
             </div>
             <div class="systemloadContainer">
@@ -30,12 +28,8 @@
                 <h2>Software</h2>
 
                 <div class="monitoredUpdateContainer">
-                    <MonitoredSoftware
-                        v-for="software of watchSoftware"
-                        :key="software.id"
-                        :software="software"
-                        @demote="demoteSoftware"
-                        @editImage="editImage" />
+                    <MonitoredSoftware v-for="software of watchSoftware" :key="software.id" :software="software"
+                        ..demote="demoteSoftware" ..editImage="editImage" />
                 </div>
                 <h2>Systemupdates</h2>
                 <table class="updateTable">
@@ -45,11 +39,8 @@
                         <th>Update</th>
                         <th></th>
                     </tr>
-                    <Software
-                        v-for="software of systemUpdates"
-                        :key="software.id"
-                        :software="software"
-                        @promote="promoteSoftware"/>
+                    <Software v-for="software of systemUpdates" :key="software.id" :software="software"
+                        ..promote="promoteSoftware" />
                 </table>
             </div>
             <div class="ipContainer">
@@ -66,12 +57,10 @@
                 </table>
             </div>
             <div class="deleteContainer">
-                <button
-                    :class="device?.owner.id == user?.id ? 'delete' : 'btn-disabled'"
-                    @click="deleteDevice()">
+                <button :class="device?.owner.id == user?.id ? 'delete' : 'btn-disabled'" ..click="deleteDevice()">
                     Delete device
                 </button>
-                <button v-show="user?.admin" class="delete" @click="deleteDeviceAdmin()">
+                <button v-show="user?.admin" class="delete" ..click="deleteDeviceAdmin()">
                     Delete device admin
                 </button>
             </div>
@@ -79,280 +68,274 @@
     </div>
 </template>
 
-<script lang="ts">
-    import { Options, Vue } from "vue-class-component"
-    import { getDeviceDetails } from "@/helper/requests"
-    import { IDevice, IDeviceSoftware, ISystemIP, IUser } from "server_mgt-lib/types"
-    import { getStatusIndicatorColor } from "@/helper/statusIndicator"
-    import StatusIndicator from "@/components/StatusIndicator.vue"
-    import Software from "@/components/DeviceDetails/Software.vue"
-    import MonitoredSoftware from "@/components/DeviceDetails/MonitoredSoftware.vue"
-    import * as requests from "@/helper/requests"
-    import * as adminRequests from "@/helper/adminRequests"
-    import GroupChange from "@/components/DeviceDetails/GroupChange.vue"
+<script setup lang="ts">
+import { getDeviceDetails } from "../helper/requests"
+import { type IDevice, type IDeviceSoftware, type ISystemIP, type IUser } from "server_mgt-lib/types"
+import { getStatusIndicatorColor } from "../helper/statusIndicator"
+import StatusIndicator from "../components/StatusIndicator.vue"
+import Software from "../components/DeviceDetails/Software.vue"
+import MonitoredSoftware from "../components/DeviceDetails/MonitoredSoftware.vue"
+import * as requests from "../helper/requests"
+import * as adminRequests from "../helper/adminRequests"
+import GroupChange from "../components/DeviceDetails/GroupChange.vue"
+import { ref } from "vue";
+import { useRoute } from "vue-router";
+import { useRouter } from "vue-router";
+import { onMounted } from "vue";
 
-    @Options({
-        props: {
-            user: Object
-        },
-        components: {
-            StatusIndicator,
-            Software,
-            MonitoredSoftware,
-            GroupChange
-        }
-    })
-    export default class DeviceDetails extends Vue {
-        device: IDevice | undefined = undefined
-        user?: IUser
+const route = useRoute()
 
-        systemUpdates: IDeviceSoftware[] = []
-        watchSoftware: IDeviceSoftware[] = []
-        ipAddresses: ISystemIP[] = []
+const props = defineProps<{
+    user: IUser
+}>()
 
-        uptime = ""
-        lastSeenDiff = ""
-        statusColor = "var(--secondary-color)"
-        updateCount = 0
+const device = ref<IDevice | undefined>(undefined)
+const user = ref<IUser | undefined>(undefined)
 
-        async created() {
-            await this.getData()
-        }
+const systemUpdates = ref<IDeviceSoftware[]>([])
+const watchSoftware = ref<IDeviceSoftware[]>([])
+const ipAddresses = ref<ISystemIP[]>([])
 
-        async getData() {
-            try{
-                this.device = await getDeviceDetails(this.$route.params.id as string)
+const uptime = ref<string>("")
+const lastSeenDiff = ref<string>("")
+const statusColor = ref<string>("var(--secondary-color)")
+const updateCount = ref<number>(0)
 
-                this.systemUpdates =
-                    this.device?.software.filter((update) => update.isSystemUpdate) ?? []
-                // sort updates by name
-                this.systemUpdates = this.systemUpdates.sort((a, b) => {
-                    if (a.name < b.name) return -1
-                    if (a.name > b.name) return 1
-                    return 0
-                })
+onMounted(async () => {
+    await getData()
+})
 
-                this.watchSoftware =
-                    this.device?.software.filter((update) => !update.isSystemUpdate) ?? []
-                // sort updates by name
-                this.watchSoftware = this.watchSoftware.sort((a, b) => {
-                    if (a.name < b.name) return -1
-                    if (a.name > b.name) return 1
-                    return 0
-                })
+const getData = async () => {
+    try {
+        device.value = await getDeviceDetails(route.params.id as string)
 
-                this.ipAddresses = this.device?.status?.ipAddresses ?? []
-                // sort ips by type, ipv4 first
-                this.ipAddresses = this.ipAddresses.sort((a, b) => {
-                    if (a.ip.includes(":") && !b.ip.includes(":")) return 1
-                    if (!a.ip.includes(":") && b.ip.includes(":")) return -1
-                    return 0
-                })
+        systemUpdates.value =
+            device.value?.software.filter((update: IDeviceSoftware) => update.isSystemUpdate) ?? []
+        // sort updates by name
+        systemUpdates.value = systemUpdates.value.sort((a: IDeviceSoftware, b: IDeviceSoftware) => {
+            if (a.name < b.name) return -1
+            if (a.name > b.name) return 1
+            return 0
+        })
 
-                this.uptime = this.getUptimeString()
-                this.lastSeenDiff = this.getLastSeenDiff()
-                this.statusColor = this.device != undefined ? getStatusIndicatorColor(this.device) : "var(--secondary-color)"
-                this.updateCount =
-                    this.device?.software.filter((update) => update.currentVersion != update.newVersion)
-                        .length ?? 0
+        watchSoftware.value =
+            device.value?.software.filter((update: IDeviceSoftware) => !update.isSystemUpdate) ?? []
+        // sort updates by name
+        watchSoftware.value = watchSoftware.value.sort((a: IDeviceSoftware, b: IDeviceSoftware) => {
+            if (a.name < b.name) return -1
+            if (a.name > b.name) return 1
+            return 0
+        })
 
-                this.$forceUpdate()
-            }catch(e){
-                console.warn(e)
-            }
+        ipAddresses.value = device.value?.status?.ipAddresses ?? []
+        // sort ips by type, ipv4 first
+        ipAddresses.value = ipAddresses.value.sort((a, b) => {
+            if (a.ip.includes(":") && !b.ip.includes(":")) return 1
+            if (!a.ip.includes(":") && b.ip.includes(":")) return -1
+            return 0
+        })
 
-            if(this.$route.params.id == undefined) return
-            setTimeout(() => {
-                this.getData()
-            }, 1000 * 10)
-        }
-
-        getLastSeenDiff() {
-            const diffSec =
-                (new Date().getTime() - new Date(this.device?.lastSeen ?? 0).getTime()) / 1000
-
-            if (diffSec < 200) return diffSec.toFixed(0) + " seconds"
-            const diffMin = diffSec / 60
-            if (diffMin < 120) return diffMin.toFixed(0) + " minutes"
-            const diffHour = diffMin / 60
-            if (diffHour < 48) return diffHour.toFixed(0) + " hours"
-            const diffDay = diffHour / 24
-            return diffDay.toFixed(0) + " days"
-        }
-
-        getUptimeString(): string {
-            const uptimeSec = this.device?.status?.uptimeSeconds ?? 0
-            if (uptimeSec < 200) return uptimeSec.toFixed(0) + " seconds"
-            const uptimeMin = uptimeSec / 60
-            if (uptimeMin < 120) return uptimeMin.toFixed(0) + " minutes"
-            const uptimeHour = uptimeMin / 60
-            if (uptimeHour < 48) return uptimeHour.toFixed(0) + " hours"
-            const uptimeDay = uptimeHour / 24
-            return uptimeDay.toFixed(0) + " days"
-        }
-
-        getStatusTooltip() {
-            return (
-                (this.device?.state ?? "Unknown state") +
-                " \n" +
-                this.uptime +
-                " up \n" +
-                this.updateCount +
-                " Updates available"
-            )
-        }
-
-        async deleteDevice() {
-            if (this.device?.owner.id != this.user?.id)
-                return alert("You are not the owner of this device")
-            if (confirm("Are you sure you want to delete this device?")) {
-                await requests.editDevice(this.device?.id ?? "", {
-                    deviceId: this.device?.id ?? "",
-                    delete: true
-                })
-            }
-        }
-
-        async deleteDeviceAdmin() {
-            if (confirm("Are you sure you want to delete this device?")) {
-                await adminRequests.editDevice({
-                    deviceId: this.device?.id ?? "",
-                    edits: {
-                        deviceId: this.device?.id ?? "",
-                        delete: true
-                    }
-                })
-            }
-        }
-
-        async promoteSoftware(software: IDeviceSoftware){
-            const imageURL = prompt("Please enter the image URL")
-            await requests.promoteSoftware({
-                deviceId: this.device?.id ?? "",
-                id: software.id,
-                imageURL: imageURL ?? undefined,
-                promote: true,
-            })
-            await this.getData()
-        }
-
-        async demoteSoftware(s: IDeviceSoftware){
-            await requests.promoteSoftware({
-                deviceId: this.device?.id ?? "",
-                id: s.id,
-                promote: false,
-            })
-            await this.getData()
-        }
-
-        async editImage(s: IDeviceSoftware){
-            const imageURL = prompt("Please enter the image URL")
-            await requests.promoteSoftware({
-                deviceId: this.device?.id ?? "",
-                id: s.id,
-                imageURL: imageURL ?? undefined,
-                promote: true,
-            })
-            await this.getData()
-        }
-
-
-        async editName(){
-            const name = prompt("Please enter the new name")
-            if(name == null) return
-            await requests.editDevice(this.device?.id ?? "", {
-                deviceId: this.device?.id ?? "",
-                newDeviceName: name
-            })
-            await this.getData()
-        }
+        uptime.value = getUptimeString()
+        lastSeenDiff.value = getLastSeenDiff()
+        statusColor.value = device.value != undefined ? getStatusIndicatorColor(device.value) : "var(--secondary-color)"
+        updateCount.value =
+            device.value?.software.filter((update: IDeviceSoftware) => update.currentVersion != update.newVersion)
+                .length ?? 0
+    } catch (e) {
+        console.warn(e)
     }
+
+    if (route.params.id == undefined) return
+    setTimeout(() => {
+        getData()
+    }, 1000 * 10)
+}
+
+const getLastSeenDiff = () => {
+    const diffSec =
+        (new Date().getTime() - new Date(device.value?.lastSeen ?? 0).getTime()) / 1000
+
+    if (diffSec < 200) return diffSec.toFixed(0) + " seconds"
+    const diffMin = diffSec / 60
+    if (diffMin < 120) return diffMin.toFixed(0) + " minutes"
+    const diffHour = diffMin / 60
+    if (diffHour < 48) return diffHour.toFixed(0) + " hours"
+    const diffDay = diffHour / 24
+    return diffDay.toFixed(0) + " days"
+}
+
+const getUptimeString = () => {
+    const uptimeSec = device.value?.status?.uptimeSeconds ?? 0
+    if (uptimeSec < 200) return uptimeSec.toFixed(0) + " seconds"
+    const uptimeMin = uptimeSec / 60
+    if (uptimeMin < 120) return uptimeMin.toFixed(0) + " minutes"
+    const uptimeHour = uptimeMin / 60
+    if (uptimeHour < 48) return uptimeHour.toFixed(0) + " hours"
+    const uptimeDay = uptimeHour / 24
+    return uptimeDay.toFixed(0) + " days"
+}
+
+const getStatusTooltip = () => {
+    return (
+        (device.value?.state ?? "Unknown state") +
+        " \n" +
+        uptime.value +
+        " up \n" +
+        updateCount.value +
+        " Updates available"
+    )
+}
+
+const deleteDevice = async () => {
+    if (device.value?.owner.id != user.value?.id)
+        return alert("You are not the owner of this device")
+    if (confirm("Are you sure you want to delete this device?")) {
+        await requests.editDevice(device.value?.id ?? "", {
+            deviceId: device.value?.id ?? "",
+            delete: true
+        })
+    }
+}
+
+const deleteDeviceAdmin = async () => {
+    if (confirm("Are you sure you want to delete this device?")) {
+        await adminRequests.editDevice({
+            deviceId: device.value?.id ?? "",
+            edits: {
+                deviceId: device.value?.id ?? "",
+                delete: true
+            }
+        })
+    }
+}
+
+const promoteSoftware = async (software: IDeviceSoftware) => {
+    const imageURL = prompt("Please enter the image URL")
+    await requests.promoteSoftware({
+        deviceId: device.value?.id ?? "",
+        id: software.id,
+        imageURL: imageURL ?? undefined,
+        promote: true,
+    })
+    await getData()
+}
+
+const demoteSoftware = async (s: IDeviceSoftware) => {
+    await requests.promoteSoftware({
+        deviceId: device.value?.id ?? "",
+        id: s.id,
+        promote: false,
+    })
+    await getData()
+}
+
+const editImage = async (s: IDeviceSoftware) => {
+    const imageURL = prompt("Please enter the image URL")
+    await requests.promoteSoftware({
+        deviceId: device.value?.id ?? "",
+        id: s.id,
+        imageURL: imageURL ?? undefined,
+        promote: true,
+    })
+    await getData()
+}
+
+
+const editName = async () => {
+    const name = prompt("Please enter the new name")
+    if (name == null) return
+    await requests.editDevice(device.value?.id ?? "", {
+        deviceId: device.value?.id ?? "",
+        newDeviceName: name
+    })
+    await getData()
+}
+
 </script>
 
 <style>
-    .deviceDetailContainer {
-    }
+.deviceDetailContainer {}
 
-    .deviceDetailContainer > h1 {
-        position: sticky;
-        top: 0;
-        background-color: var(--bg-color);
-        padding: 0.5rem;
-        margin: 0.3rem;
-        z-index: 200;
-    }
+.deviceDetailContainer>h1 {
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-color);
+    padding: 0.5rem;
+    margin: 0.3rem;
+    z-index: 200;
+}
 
-    .deviceDetailContent > * {
-        background: var(--secondary-color);
-        padding: 0.5rem;
-        border-radius: 1ch;
-        margin: 0.5rem;
-        display: block;
-    }
+.deviceDetailContent>* {
+    background: var(--secondary-color);
+    padding: 0.5rem;
+    border-radius: 1ch;
+    margin: 0.5rem;
+    display: block;
+}
 
-    .deviceDetailContent {
-        border-radius: 1rem;
-    }
+.deviceDetailContent {
+    border-radius: 1rem;
+}
 
-    .deviceDetailContent > .simpleData {
-    }
-    .deviceDetailContent > .simpleData > * {
-        display: block;
-        margin: 0.5rem;
+.deviceDetailContent>.simpleData {}
 
-        text-align: left;
-    }
+.deviceDetailContent>.simpleData>* {
+    display: block;
+    margin: 0.5rem;
 
-    .softwareListContainer {
-        overflow-x: hidden;
-    }
+    text-align: left;
+}
 
-    .monitoredUpdateContainer {
-        position: relative;
-        display: flex;
-        flex-wrap: wrap;
-        flex-direction: row;
-        gap: 1ch;
-    }
+.softwareListContainer {
+    overflow-x: hidden;
+}
 
-    .monitoredUpdateContainer > * {
-        flex: 1 1 26ch;
-        width: fit-content;
-    }
+.monitoredUpdateContainer {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 1ch;
+}
 
-    .updateTable {
-        width: 100%;
-        border-collapse: collapse;
-        overflow-x: scroll;
-        display: table;
-    }
+.monitoredUpdateContainer>* {
+    flex: 1 1 26ch;
+    width: fit-content;
+}
 
-    .updateTable table,
-    .updateTable th,
-    .updateTable td {
-        border: 1px solid var(--bg-color);
-    }
+.updateTable {
+    width: 100%;
+    border-collapse: collapse;
+    overflow-x: scroll;
+    display: table;
+}
 
-    .systemloadContainer > div {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-around;
-    }
+.updateTable table,
+.updateTable th,
+.updateTable td {
+    border: 1px solid var(--bg-color);
+}
 
-    .ipContainer > * {
-        display: block;
-    }
+.systemloadContainer>div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
 
-    .ipTable {
-        width: 100%;
-        border-collapse: collapse;
-        overflow-x: scroll;
-        display: table;
-    }
+.ipContainer>* {
+    display: block;
+}
 
-    .ipTable table,
-    .ipTable th,
-    .ipTable td {
-        border: 1px solid var(--bg-color);
-    }
+.ipTable {
+    width: 100%;
+    border-collapse: collapse;
+    overflow-x: scroll;
+    display: table;
+}
+
+.ipTable table,
+.ipTable th,
+.ipTable td {
+    border: 1px solid var(--bg-color);
+}
 </style>
