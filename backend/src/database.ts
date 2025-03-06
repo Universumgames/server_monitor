@@ -1,11 +1,11 @@
-import { Connection, createConnection } from "typeorm"
+import { Connection, createConnection, DataSource } from "typeorm"
 import { config } from "./monitor_config"
 
 /**
  * Database class to manage access to database
  */
 export default class Database {
-    private dbConnection: Connection
+    private dbConnection: DataSource
 
     private static instance: Database
     /**
@@ -20,7 +20,7 @@ export default class Database {
      */
     async init() {
         try {
-            this.dbConnection = await createConnection({
+            this.dbConnection = new DataSource({
                 type: config.database.type as any,
                 host: config.database.host,
                 port: config.database.port,
@@ -32,6 +32,7 @@ export default class Database {
                 synchronize: true,
                 logging: false
             })
+            await this.dbConnection.initialize()
             /* const repo = this.dbConnection.getRepository(User)
             const u = new User()
             const u2 = await repo.findOne({ where: { mail: "test@test.com" } })

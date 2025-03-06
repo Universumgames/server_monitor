@@ -4,9 +4,7 @@ WORKDIR /server_monitor/api_server
 COPY ./backend/ .
 COPY ./backend/config/ ./config/
 COPY ./interfaces/ ../interfaces/
-RUN cd ../interfaces && npm install
 RUN npm install --legacy-peer-deps
-RUN npm link ../interfaces
 RUN npm run build
 
 EXPOSE 6060
