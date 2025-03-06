@@ -2,3 +2,4 @@
 .eslintrc.json
 *.tgz
 package
+tsconfig.tsbuildinfo
