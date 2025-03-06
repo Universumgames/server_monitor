@@ -50,7 +50,6 @@
 </template>
 
 <script lang="ts" setup>
-import LanguageSelect from "./LanguageSelect.vue"
 import { computed } from "vue"
 import { RouterLink } from 'vue-router'
 
