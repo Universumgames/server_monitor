@@ -3,7 +3,10 @@ FROM node:23-alpine
 WORKDIR /server_monitor/api_server
 COPY ./backend/ .
 COPY ./backend/config/ ./config/
-COPY ./interfaces/ ../interfaces/
+COPY ./interfaces/ /server_monitor/interfaces/
+WORKDIR /server_monitor/interfaces
+RUN npm pack
+WORKDIR /server_monitor/api_server
 RUN npm install --legacy-peer-deps
 RUN npm run build
 

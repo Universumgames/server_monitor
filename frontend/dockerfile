@@ -2,7 +2,10 @@ FROM node:23-alpine
 
 WORKDIR /server_monitor/frontend
 COPY ./frontend/ .
-COPY ./interfaces/ ../interfaces/
+COPY ./interfaces/ /server_monitor/interfaces/
+WORKDIR /server_monitor/interfaces
+RUN npm pack
+WORKDIR /server_monitor/frontend
 RUN npm i -g npm
 RUN npm cache clean --force
 RUN npm install --legacy-peer-deps
