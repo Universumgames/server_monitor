@@ -9,6 +9,7 @@ RUN npm install --legacy-peer-deps
 RUN npm pack
 WORKDIR /server_monitor/frontend
 RUN npm cache clean --force
+RUN npm install ../interfaces/server_monitor-1.0.0.tgz
 RUN npm install --legacy-peer-deps
 RUN npm run build
 
