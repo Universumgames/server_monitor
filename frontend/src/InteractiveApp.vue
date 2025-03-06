@@ -15,7 +15,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { type IUser } from "server_mgt-lib/types"
 import { isLoggedIn, logout, getServerInfo, getBasicUser } from "./helper/requests"
-import Footer from "./components/Footer.vue"
+import Footer from "./components/FooterView.vue"
 
 const loggedIn = ref<boolean>(false)
 const admin = ref<boolean>(false)

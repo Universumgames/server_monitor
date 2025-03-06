@@ -1,7 +1,7 @@
 <template>
     <div class="deviceDetailContainer">
         <h1>
-            <label ..click="editName">Details of {{ device?.name ?? "loading" }}</label>
+            <label @click="editName">Details of {{ device?.name ?? "loading" }}</label>
             <StatusIndicator :style="'background-color:' + statusColor" :tooltip="getStatusTooltip()" />
         </h1>
         <div class="deviceDetailContent">
@@ -12,7 +12,7 @@
                 <label>Last seen: ~{{ lastSeenDiff }} ago</label>
                 <label>Updates: {{ updateCount }}</label>
                 <label>Group:
-                    <GroupChange :device="device" :enabled="user?.id == device?.owner.id" />
+                    <GroupChange v-if="device != undefined" :device="device" :enabled="user?.id == device?.owner.id" />
                 </label>
                 <label>Owner: {{ device?.owner.username }}</label>
             </div>
@@ -57,10 +57,10 @@
                 </table>
             </div>
             <div class="deleteContainer">
-                <button :class="device?.owner.id == user?.id ? 'delete' : 'btn-disabled'" ..click="deleteDevice()">
+                <button :class="device?.owner.id == user?.id ? 'delete' : 'btn-disabled'" @click="deleteDevice()">
                     Delete device
                 </button>
-                <button v-show="user?.admin" class="delete" ..click="deleteDeviceAdmin()">
+                <button v-show="user?.admin" class="delete" @click="deleteDeviceAdmin()">
                     Delete device admin
                 </button>
             </div>
@@ -70,7 +70,7 @@
 
 <script setup lang="ts">
 import { getDeviceDetails } from "../helper/requests"
-import { type IDevice, type IDeviceSoftware, type ISystemIP, type IUser } from "server_mgt-lib/types"
+import { type IDevice, type IDeviceSoftware, type IMonitoredSoftware, type ISystemIP, type IUser } from "server_mgt-lib/types"
 import { getStatusIndicatorColor } from "../helper/statusIndicator"
 import StatusIndicator from "../components/StatusIndicator.vue"
 import Software from "../components/DeviceDetails/Software.vue"
@@ -93,7 +93,7 @@ const device = ref<IDevice | undefined>(undefined)
 const user = ref<IUser | undefined>(undefined)
 
 const systemUpdates = ref<IDeviceSoftware[]>([])
-const watchSoftware = ref<IDeviceSoftware[]>([])
+const watchSoftware = ref<IMonitoredSoftware[]>([])
 const ipAddresses = ref<ISystemIP[]>([])
 
 const uptime = ref<string>("")
@@ -119,7 +119,7 @@ const getData = async () => {
         })
 
         watchSoftware.value =
-            device.value?.software.filter((update: IDeviceSoftware) => !update.isSystemUpdate) ?? []
+            device.value?.software.filter((update: IDeviceSoftware) => !update.isSystemUpdate) as IMonitoredSoftware[] ?? []
         // sort updates by name
         watchSoftware.value = watchSoftware.value.sort((a: IDeviceSoftware, b: IDeviceSoftware) => {
             if (a.name < b.name) return -1

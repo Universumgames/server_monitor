@@ -1,7 +1,7 @@
 <template>
     <div class="deviceOverviewContainer emptyContainer">
         <h3>
-            <StatusIndicator style="background-color: var(--bg-color)" />
+            <StatusIndicator style="background-color: var(--bg-color)" :tooltip="''" />
         </h3>
         <small class="uuid"></small><br />
         <small class="pwstate"></small><br />

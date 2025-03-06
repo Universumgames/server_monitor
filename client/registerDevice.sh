@@ -18,7 +18,7 @@ if [ -z "$deviceName" ]; then
 fi
 
 if [ -z "$serverUrl" ]; then
-  echo "Enter server url:"
+  echo "Enter server api url:"
   read -r serverUrl
 fi
 

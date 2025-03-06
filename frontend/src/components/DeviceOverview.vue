@@ -5,8 +5,8 @@
         </div>
         <div v-else>
             <h3>
-                {{ basicDevice?.name ?? deviceName }}
-                <StatusIndicator :style="'background-color:' + statusColor" :tooltip="getStatusTooltip()" />
+                {{ basicDevice?.name ?? "Unknown device" }}
+                <StatusIndicator :style="'background-color:' + statusColor" :tooltip="tooltip" />
             </h3>
             <small>{{ basicDevice?.id ?? deviceId }}</small><br />
             <small>Powerstate: {{ basicDevice?.state ?? "" }}</small><br />
@@ -27,7 +27,6 @@ import StatusIndicator from "./StatusIndicator.vue"
 import BlankDeviceOverview from "./Blanks/BlankDeviceOverview.vue"
 
 const props = defineProps<{
-    deviceName: string,
     deviceId: string
 }>()
 
@@ -44,6 +43,7 @@ const uptime = ref<string>("")
 const lastSeenDiff = ref<string>("")
 const statusColor = ref<string>("var(--secondary-color)")
 const updateCount = ref<number>(0)
+const tooltip = ref<string>("")
 
 let currentIntervalId: number | undefined
 
@@ -55,6 +55,7 @@ const getData = async () => {
     lastSeenDiff.value = getLastSeenDiff()
     statusColor.value = basicDevice.value == undefined ? "gray" : getStatusIndicatorColor(basicDevice.value)
     updateCount.value = softwareUpdates.value == undefined ? 0 : softwareUpdates.value.filter((update: IDeviceSoftware) => update.currentVersion != update.newVersion).length
+    tooltip.value = getStatusTooltip()
 
     error.value = basicDevice.value == undefined
 }
