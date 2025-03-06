@@ -13,7 +13,7 @@ services:
     api:
         build:
             context: ../../
-            dockerfile: ./backend/dockerfile
+            dockerfile: ./backend/Dockerfile
         ports:
             - "6060:6060"
         volumes:

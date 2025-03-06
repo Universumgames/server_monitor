@@ -16,7 +16,7 @@ services:
     api:
         build:
             context: ../
-            dockerfile: ./backend/dockerfile
+            dockerfile: ./backend/Dockerfile
         restart: unless-stopped
         #volumes:
         #    - ../backend/config:/server_monitor/api_server/config
@@ -35,7 +35,7 @@ services:
         #image: arm64v8/caddy
         build:
             context: ../
-            dockerfile: ./frontend/dockerfile
+            dockerfile: ./frontend/Dockerfile
         restart: unless-stopped
         container_name: server_monitor_caddy
         depends_on:

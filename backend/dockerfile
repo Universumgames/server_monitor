@@ -1,4 +1,4 @@
-from node
+FROM node
 
 WORKDIR /server_monitor/api_server
 COPY ./backend/ .
@@ -8,4 +8,4 @@ RUN npm install --legacy-peer-deps
 RUN npm run build
 
 EXPOSE 6060
-CMD [ "node", "./compiled/index.js" ]
+CMD [ "npm", "run", "serve" ]
