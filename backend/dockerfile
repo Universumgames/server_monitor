@@ -9,7 +9,7 @@ RUN npm install --legacy-peer-deps
 RUN npm pack
 WORKDIR /server_monitor/api_server
 RUN npm cache clean --force
-RUN npm install --legacy-peer-deps
+RUN npm install ../interfaces/server_mgt-lib-1.0.0.tgz --legacy-peer-deps
 RUN npm run build
 
 EXPOSE 6060
