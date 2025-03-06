@@ -1,10 +1,10 @@
-FROM node
+FROM node:23-alpine
 
 WORKDIR /server_monitor/api_server
 COPY ./backend/ .
 COPY ./backend/config/ ./config/
 COPY ./interfaces/ ../interfaces/
-RUN npm install --legacy-peer-deps
+RUN npm install
 RUN npm run build
 
 EXPOSE 6060
